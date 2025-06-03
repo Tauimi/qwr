@@ -1,0 +1,311 @@
+{# No extends 'layout.html' as this is for modal injection #}
+
+{# We might not need all extra_css from product.html if layout.html already covers some #}
+{# Or, we might need to ensure these styles are loaded if not already present #}
+{# For simplicity, I'll include them, but this could be optimized #}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common_stock.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/product_page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reviews.css') }}">
+<style>
+    /* Styles specific to product modal content, if any, can go here */
+    /* Or reuse styles from product_page.css if they are general enough */
+    .product-specifications {
+        margin-top: 20px; /* Adjusted margin for modal */
+        background: white;
+        padding: 15px; /* Adjusted padding */
+        border-radius: 8px;
+        /* box-shadow: var(--box-shadow); Removed or reduced for modal */
+    }
+    
+    .specifications-title {
+        font-size: 1.1em; /* Adjusted size */
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+    }
+    
+    .specifications-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .specifications-table tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+    
+    .specifications-table td {
+        padding: 8px; /* Adjusted padding */
+        border: 1px solid #eee;
+    }
+    
+    .specifications-table td:first-child {
+        font-weight: bold;
+        width: 40%;
+    }
+    /* Ensure product details are scrollable if too long */
+    .product-details-modal-view {
+        /* max-height: 60vh; /* Example, adjust as needed */
+        /* overflow-y: auto; /* Handled by #productModalBody now */
+    }
+</style>
+
+<div class="product-details-modal-view">
+    {# Breadcrumbs are usually not needed in a modal, so they are removed #}
+    
+    <div class="product-details">
+        <div class="product-gallery">
+            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}" style="max-width: 100%; height: auto;">
+        </div>
+        
+        <div class="product-detail-info">
+            <h1 class="product-detail-title">{{ product.name }}</h1>
+            <div class="product-detail-price">{{ product.price }} ₽</div>
+            
+            <div class="product-actions">
+                <div class="favorite-action">
+                    <button type="button" class="favorite-btn {% if product.id in session.get('favorites', []) %}active{% endif %}" 
+                            data-product-id="{{ product.id }}" aria-label="Добавить в избранное" title="Добавить в избранное">
+                        <i class="fas fa-heart"></i>
+                        <span class="favorite-count">{{ session.get('favorites', [])|length }}</span>
+                    </button>
+                </div>
+                
+                <div class="main-actions">
+                    <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" aria-label="Количество товара" title="Количество товара">
+                            <button type="button" class="quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
+                        </div>
+                        
+                        <div class="cart-controls">
+                            <button type="submit" class="add-to-cart-large">В корзину</button>
+                            <div class="cart-quantity-controls" style="display: none;">
+                                <button type="button" class="cart-quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
+                                <span class="cart-quantity-value">1</span>
+                                <button type="button" class="cart-quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <button type="button" class="compare-btn {% if product.id in session.get('compare', []) %}active{% endif %}" 
+                            data-product-id="{{ product.id }}" aria-label="Добавить к сравнению" title="Добавить к сравнению">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>В сравнение</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="product-description">
+                {{ product.description|safe }}
+            </div>
+            
+            <!-- Quick rating might need JS re-initialization if used in modal -->
+            <div class="quick-rating-box">
+                <div class="quick-rating-title">Оцените товар</div>
+                <div class="quick-rating-stars" id="quick-rating-stars-modal-{{ product.id }}"> {# Unique ID for modal context #}
+                    <div class="star-rating-row">
+                        {% for i in range(1, 6) %}
+                            <span class="quick-star" data-rating="{{ i }}">
+                                <i class="far fa-star"></i>
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="quick-rating-message" id="rating-result-modal-{{ product.id }}">
+                        Нажмите на звезду, чтобы оценить товар
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stock-indicator {% if product.stock > 5 %}in-stock{% elif product.stock > 0 %}low-stock{% else %}out-of-stock{% endif %}">
+                <i class="fas {% if product.stock > 5 %}fa-check-circle{% elif product.stock > 0 %}fa-exclamation-circle{% else %}fa-times-circle{% endif %}"></i>
+                {% if product.stock > 5 %}
+                    В наличии
+                {% elif product.stock > 0 %}
+                    Мало ({{ product.stock }} шт.)
+                {% else %}
+                    Нет в наличии
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="product-specifications">
+        <h3 class="specifications-title">Характеристики</h3>
+        <table class="specifications-table">
+            {% for spec in product.specifications %}
+            <tr>
+                <td>{{ spec.name }}</td>
+                <td>{{ spec.value }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    {# Reviews Section - adapted for modal #}
+    <div class="reviews-section-modal">
+        <h3 class="reviews-title">Отзывы о товаре ({{ reviews|length }})</h3>
+        {% if reviews %}
+            <div class="reviews-list-modal">
+                {% for review in reviews %}
+                <div class="review-item-modal">
+                    <div class="review-author-modal">{{ review.user_name }} <span class="review-date-modal">{{ review.created_at.strftime('%d.%m.%Y') }}</span></div>
+                    <div class="review-rating-modal">Оценка: {{ review.rating }}/5</div>
+                    <div class="review-text-modal">{{ review.text }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Отзывов пока нет. Будьте первым!</p>
+        {% endif %}
+        {# Form to add review - might need JS to handle submission from modal #}
+        {# Consider if adding reviews directly in modal is desired UX #}
+    </div>
+
+    {# Related Products Section - adapted for modal #}
+    {% if related_products %}
+    <div class="related-products-section-modal">
+        <h3 class="related-products-title">Похожие товары</h3>
+        <div class="related-products-grid-modal">
+            {% for rel_product in related_products %}
+            <div class="related-product-card-modal">
+                <a href="#" onclick="loadProductInModal({{ rel_product.id }}); return false;">
+                    <img src="{{ url_for('static', filename='images/' + rel_product.image) }}" alt="{{ rel_product.name }}" class="related-product-image-modal">
+                    <div class="related-product-name-modal">{{ rel_product.name }}</div>
+                    <div class="related-product-price-modal">{{ rel_product.price }} ₽</div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div> {# Closes product-details-modal-view #}
+
+{# Scripts that might be needed for dynamic content within the modal #}
+{# Ensure these are either already loaded globally or loaded specifically for the modal #}
+{# For example, favorite, compare, add to cart AJAX, quantity controls, star ratings #}
+<script>
+    // Re-initialize or ensure event delegation for dynamic content if necessary
+    // This is a placeholder for where such script re-initializations would go.
+    // Example: if star ratings are dynamically added, their JS might need to be re-run.
+    // Or, better, use event delegation from a parent static element.
+
+    // Initialize quick rating for the modal if it's not handled by event delegation
+    // This is a simplified example; actual implementation might vary
+    function initializeModalScripts(productId) {
+        // Quick Rating
+        const quickRatingStarsContainer = document.getElementById('quick-rating-stars-modal-' + productId);
+        if (quickRatingStarsContainer) {
+            quickRatingStarsContainer.querySelectorAll('.quick-star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = this.dataset.rating;
+                    const messageContainer = document.getElementById('rating-result-modal-' + productId);
+                    // Placeholder for AJAX call to submit rating
+                    console.log(`Rated product ${productId} with ${rating} stars in modal.`);
+                    if(messageContainer) messageContainer.textContent = `Спасибо за вашу оценку: ${rating}/5`;
+                    let parent = this.closest('.star-rating-row');
+                    if(parent){
+                        let starsInRow = parent.querySelectorAll('.quick-star');
+                        starsInRow.forEach((s, index) => {
+                            s.innerHTML = index < rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                        });
+                    }
+                });
+            });
+        }
+
+        // Add to cart AJAX for modal
+        const addToCartFormModal = document.querySelector('#productModalBody .ajax-add-to-cart');
+        if (addToCartFormModal) {
+            // Clone and replace to remove old event listeners if any
+            const newForm = addToCartFormModal.cloneNode(true);
+            addToCartFormModal.parentNode.replaceChild(newForm, addToCartFormModal);
+            
+            newForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                const currentProductId = this.dataset.productId;
+                fetch(this.action, { // Action should be correct for currentProductId
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        console.log('Product added to cart from modal:', data.message);
+                        if (typeof updateCartCount === 'function') {
+                            updateCartCount(data.cart_total_items);
+                        }
+                        // Optionally, show a success message in the modal
+                        // alert(data.message);
+                    } else {
+                        console.error('Error adding to cart from modal:', data.message);
+                        // alert('Ошибка: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('AJAX error:', error));
+            });
+        }
+
+        // Favorite button AJAX for modal
+        document.querySelectorAll('#productModalBody .favorite-btn').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            newButton.addEventListener('click', function() {
+                const currentProductId = this.dataset.productId;
+                // Placeholder for AJAX call
+                console.log(`Toggled favorite for product ${currentProductId} in modal`);
+                this.classList.toggle('active');
+                // Update favorite count (if displayed and managed by JS)
+                // Example: fetch('/toggle_favorite/' + currentProductId).then(...)
+            });
+        });
+
+        // Compare button AJAX for modal
+        document.querySelectorAll('#productModalBody .compare-btn').forEach(button => {
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            newButton.addEventListener('click', function() {
+                const currentProductId = this.dataset.productId;
+                // Placeholder for AJAX call
+                console.log(`Toggled compare for product ${currentProductId} in modal`);
+                this.classList.toggle('active');
+                // Example: fetch('/toggle_compare/' + currentProductId).then(...)
+            });
+        });
+
+        // Quantity controls for modal
+        document.querySelectorAll('#productModalBody .quantity-control').forEach(control => {
+            const decreaseBtn = control.querySelector('.quantity-decrease');
+            const increaseBtn = control.querySelector('.quantity-increase');
+            const input = control.querySelector('input[name="quantity"]');
+            const maxStock = parseInt(input.max);
+            
+            // Clone and replace buttons to ensure fresh event listeners
+            if(decreaseBtn) {
+                const newDecreaseBtn = decreaseBtn.cloneNode(true);
+                decreaseBtn.parentNode.replaceChild(newDecreaseBtn, decreaseBtn);
+                newDecreaseBtn.addEventListener('click', () => {
+                    let currentValue = parseInt(input.value);
+                    if (currentValue > 1) input.value = currentValue - 1;
+                });
+            }
+            if(increaseBtn) {
+                const newIncreaseBtn = increaseBtn.cloneNode(true);
+                increaseBtn.parentNode.replaceChild(newIncreaseBtn, increaseBtn);
+                newIncreaseBtn.addEventListener('click', () => {
+                    let currentValue = parseInt(input.value);
+                    if (currentValue < maxStock) input.value = currentValue + 1;
+                });
+            }
+        });
+    }
+
+    // Call initialization when modal content is loaded.
+    // The `loadProductInModal` function in layout.html should call this
+    // after successfully injecting content into #productModalBody.
+    // For example: initializeModalScripts(productId);
+</script>
+
+
+    <div class=
