@@ -57,6 +57,10 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
+    # Гарантируем создание всех таблиц перед первым запросом
+    with app.app_context():
+        db.create_all()
+
     # Настройка логирования
     if not app.debug:
         # Создание директории для логов, если её нет
@@ -180,4 +184,4 @@ def create_app(config_name=None):
         app.register_blueprint(blueprint)
 
     # Возвращаем созданное приложение
-    return app 
+    return app
