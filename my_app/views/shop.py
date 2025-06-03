@@ -197,6 +197,30 @@ def product(product_id):
     if product_id not in visited_products:
         visited_products.append(product_id)
         session['visited_products'] = visited_products[:10]  # Храним только 10 последних
+
+@shop_bp.route('/product_modal/<int:product_id>')
+def product_modal(product_id):
+    """Возвращает HTML для модального окна товара"""
+    product = Product.query.get_or_404(product_id)
+    # The logic for visited products is not needed for the modal view
+    # as it's handled by the full product page or can be moved to client-side if desired.
+
+    # Fetch related products for the modal as well
+    related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
+
+    # Fetch reviews and ratings for the modal
+    reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
+    total_reviews = len(reviews)
+    avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
+    if avg_rating is None: avg_rating = 0
+
+    # Render a partial template for the modal content
+    return render_template('product_modal_content.html', 
+                           product=product, 
+                           related_products=related_products,
+                           reviews=reviews,
+                           total_reviews=total_reviews,
+                           avg_rating=avg_rating)
     
     return render_template('product.html', product=product)
 
@@ -248,4 +272,4 @@ def get_carousel_image(slide_id):
         if not os.path.exists(os.path.join(carousel_dir, image_name)):
             image_name = 'default.jpg'
     
-    return send_from_directory(os.path.join(current_app.static_folder, 'images', 'carousel'), image_name) 
+    return send_from_directory(os.path.join(current_app.static_folder, 'images', 'carousel'), image_name)
