@@ -1,0 +1,455 @@
+{% extends 'layout.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carousel.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common_stock.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home_page.css') }}">
+<style>
+/* Современная карусель */
+.modern-carousel-container {
+    margin-bottom: 40px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.carousel-wrapper {
+    position: relative;
+    max-width: 100%;
+    height: 400px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.carousel-slides {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    overflow: hidden;
+}
+
+.carousel-slide.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide-content {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    padding: 0 5%;
+}
+
+.slide-text {
+    flex: 1;
+    padding-right: 30px;
+    color: #333;
+    z-index: 2;
+}
+
+.slide-text h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 700;
+}
+
+.slide-text p {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.slide-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.slide-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+}
+
+.slide-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slide-image img {
+    max-width: 100%;
+    max-height: 350px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.carousel-arrow:hover {
+    background: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+.carousel-arrow.prev {
+    left: 20px;
+}
+
+.carousel-arrow.next {
+    right: 20px;
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    width: 30px;
+    border-radius: 5px;
+    background: #3498db;
+}
+
+/* Категории */
+.category-icon img {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .carousel-wrapper {
+        height: auto;
+        min-height: 500px;
+    }
+
+    .slide-content {
+        flex-direction: column-reverse;
+        padding: 20px;
+    }
+
+    .slide-text, .slide-image {
+        width: 100%;
+        padding: 0;
+        text-align: center;
+    }
+
+    .slide-text {
+        margin-top: 20px;
+    }
+
+    .slide-text h2 {
+        font-size: 24px;
+    }
+
+    .slide-text p {
+        font-size: 16px;
+    }
+
+    .slide-image img {
+        max-height: 200px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Современная карусель новостей и акций -->
+    <div class="modern-carousel-container">
+        <div class="carousel-wrapper">
+            <div class="carousel-slides">
+                <div class="carousel-slide active">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Скидки до 50%</h2>
+                            <p>На все товары для дома до конца месяца</p>
+                            <a href="{{ url_for('shop.catalog') }}" class="slide-btn">Перейти в каталог</a>
+                        </div>
+                        <div class="slide-image">
+                            <img src="{{ url_for('static', filename='images/carousel/slide1.jpg') }}" alt="Акция 1" 
+                                 onerror="this.src='https://via.placeholder.com/600x400/3498db/ffffff?text=Скидки+до+50%'">
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Новая коллекция</h2>
+                            <p>Осень-зима 2023: эксклюзивные новинки уже в продаже</p>
+                            <a href="{{ url_for('shop.catalog') }}" class="slide-btn">Смотреть новинки</a>
+                        </div>
+                        <div class="slide-image">
+                            <img src="{{ url_for('static', filename='images/carousel/slide2.jpg') }}" alt="Новая коллекция" 
+                                 onerror="this.src='https://via.placeholder.com/600x400/e74c3c/ffffff?text=Новая+коллекция'">
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <div class="slide-text">
+                            <h2>Бесплатная доставка</h2>
+                            <p>При заказе от 3000 ₽ - доставка в любой город бесплатно</p>
+                            <a href="{{ url_for('static_pages.delivery') }}" class="slide-btn">Условия доставки</a>
+                        </div>
+                        <div class="slide-image">
+                            <img src="{{ url_for('static', filename='images/carousel/slide3.jpg') }}" alt="Бесплатная доставка" 
+                                 onerror="this.src='https://via.placeholder.com/600x400/2ecc71/ffffff?text=Бесплатная+доставка'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-arrow prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-arrow next"><i class="fas fa-chevron-right"></i></button>
+            <div class="carousel-indicators">
+                <span class="indicator active"></span>
+                <span class="indicator"></span>
+                <span class="indicator"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новая структура: Категории слева, товары справа -->
+    <div class="main-content">
+        <!-- Боковая панель с категориями -->
+        <div class="sidebar">
+            <div class="categories">
+                <h3>Категории товаров</h3>
+                <ul class="category-list">
+                    {% for category in categories %}
+                    <li>
+                        <a href="{{ url_for('shop.category', category_id=category.id) }}">
+                            {% if category.image %}
+                                <img src="{{ url_for('static', filename='images/' + category.image) }}" alt="{{ category.name }}" class="category-icon">
+                            {% else %}
+                                <i class="fas fa-folder"></i>
+                            {% endif %}
+                            {{ category.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="visitor-counter">
+                <h3>Статистика посещений</h3>
+                <div class="count">{{ visitor_stats.total }}</div>
+                <p>посетителей сегодня</p>
+            </div>
+        </div>
+
+        <!-- Основной контент с товарами -->
+        <div class="content">
+            <!-- Популярные товары -->
+            <h2>Популярные товары</h2>
+            <div class="products-grid">
+                {% for product in popular_products %}
+                <div class="product-card">
+                    <div class="product-image">
+                        <a href="{{ url_for('shop.product', product_id=product.id) }}">
+                            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}"
+                                 onerror="this.src='https://via.placeholder.com/300x300/f5f5f5/333?text=Нет+фото'">
+                        </a>
+                        {% if product.stock > 5 %}
+                            <div class="stock-badge stock-high">В наличии</div>
+                        {% elif product.stock > 0 %}
+                            <div class="stock-badge stock-low">Осталось {{ product.stock }} шт.</div>
+                        {% else %}
+                            <div class="stock-badge stock-none">Нет в наличии</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">
+                            <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                        </div>
+                        <div class="product-price">{{ product.price }} ₽</div>
+                        <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="add-to-cart" {% if product.stock <= 0 %}disabled{% endif %}>
+                                {% if product.stock > 0 %}
+                                    В корзину
+                                {% else %}
+                                    Нет в наличии
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Новинки -->
+            <h2>Новинки</h2>
+            <div class="products-grid">
+                {% for product in new_products %}
+                <div class="product-card">
+                    <div class="product-image">
+                        <a href="{{ url_for('shop.product', product_id=product.id) }}">
+                            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}"
+                                 onerror="this.src='https://via.placeholder.com/300x300/f5f5f5/333?text=Нет+фото'">
+                        </a>
+                        {% if product.is_new %}
+                            <div class="product-badge new-badge">Новинка</div>
+                        {% endif %}
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">
+                            <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                        </div>
+                        <div class="product-price">{{ product.price }} ₽</div>
+                        <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
+                            <input type="hidden" name="quantity" value="1">
+                            <button type="submit" class="add-to-cart" {% if product.stock <= 0 %}disabled{% endif %}>
+                                {% if product.stock > 0 %}
+                                    В корзину
+                                {% else %}
+                                    Нет в наличии
+                                {% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+             <!-- Раздел товаров со скидкой удален по запросу -->
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Инициализация карусели
+    const slides = document.querySelectorAll('.carousel-slide');
+    const indicators = document.querySelectorAll('.indicator');
+    const prevBtn = document.querySelector('.carousel-arrow.prev');
+    const nextBtn = document.querySelector('.carousel-arrow.next');
+    let currentIndex = 0;
+    let interval;
+
+    // Функция для переключения слайда
+    function goToSlide(index) {
+        // Убираем активный класс со всех слайдов и индикаторов
+        slides.forEach(slide => slide.classList.remove('active'));
+        indicators.forEach(dot => dot.classList.remove('active'));
+
+        // Добавляем активный класс нужному слайду и индикатору
+        currentIndex = (index + slides.length) % slides.length;
+        slides[currentIndex].classList.add('active');
+        indicators[currentIndex].classList.add('active');
+    }
+
+    // Автоматическое переключение
+    function startAutoSlide() {
+        interval = setInterval(() => {
+            goToSlide(currentIndex + 1);
+        }, 5000); // Меняем слайд каждые 5 секунд
+    }
+
+    // Останавливаем автоматическое переключение при наведении
+    document.querySelector('.carousel-wrapper').addEventListener('mouseenter', () => {
+        clearInterval(interval);
+    });
+
+    // Возобновляем при уходе курсора
+    document.querySelector('.carousel-wrapper').addEventListener('mouseleave', () => {
+        startAutoSlide();
+    });
+
+    // Обработчики для кнопок
+    prevBtn.addEventListener('click', () => {
+        goToSlide(currentIndex - 1);
+    });
+
+    nextBtn.addEventListener('click', () => {
+        goToSlide(currentIndex + 1);
+    });
+
+    // Обработчики для индикаторов
+    indicators.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            goToSlide(index);
+        });
+    });
+
+    // Инициализация
+    startAutoSlide();
+
+    // Свайп для мобильных устройств
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const carousel = document.querySelector('.carousel-wrapper');
+
+    carousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    carousel.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        if (touchEndX < touchStartX - 50) {
+            // Свайп влево - следующий слайд
+            goToSlide(currentIndex + 1);
+        } else if (touchEndX > touchStartX + 50) {
+            // Свайп вправо - предыдущий слайд
+            goToSlide(currentIndex - 1);
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+<!-- Список отзывов -->
+<div class="reviews-list">
+    {% if reviews %}
+        <div class="review-sorting">
+            <span>Сортировать по:</span>
+            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='date', order='desc') }}" class="sort-option {% if request.args.get('sort', 'date') == 'date' and request.args.get('order', 'desc') == 'desc' %}active{% endif %}">Сначала новые</a>
+            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='date', order='asc') }}" class="sort-option {% if request.args.get('sort') == 'date' and request.args.get('order') == 'asc' %}active{% endif %}">Сначала старые</a>
+            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='rating', order='desc') }}" class="sort-option {% if request.args.get('sort') == 'rating' and request.args.get('order') == 'desc' %}active{% endif %}">По рейтингу (высокий)</a>
+            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='rating', order='asc') }}" class="sort-option {% if request.args.get('sort') == 'rating' and request.args.get('order') == 'asc' %}active{% endif %}">По рейтингу (низкий)</a>
+            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='likes', order='desc') }}" class="sort-option {% if request.args.get('sort') == 'likes' %}active{% endif %}">Самые полезные</a>
+        </div>
+        
+        {% for review in reviews %}
+            <div class="review-item" id="review-{{ review.id }}">
+                <div class="review-header">
+                    <div class="review-user">
+                        <span class="user-name">{{ review.username }}</span>
+                        <span class="review-date">{{ review.formatted_date }}</span>
+                    </div>
+                    <div class="review-rating">
+                        {% for i in range(1, 6) %}
+                            {% if i <= review.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="rating-value">{{ review.rating }}/5</span>
+                    </div>
+                </div>
+                
+                {% if review.title %}
+                    <h4 class="review-title">{{ review.title }}</h4>
+                {% endif %}
+                
+                <div class="review-content">
+                    {{ review.content }}
+                </div>
+                
+                <div class="review-footer">
+                    <div class="review-votes">
+                        <span>Был ли этот отзыв полезен?</span>
+                        <button class="vote-btn like-btn" data-review-id="{{ review.id }}" data-vote-type="like">
+                            <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ review.likes }}</span>
+                        </button>
+                        <button class="vote-btn dislike-btn" data-review-id="{{ review.id }}" data-vote-type="dislike">
+                            <i class="fas fa-thumbs-down"></i> <span class="dislike-count">{{ review.dislikes }}</span>
+                        </button>
+                    </div>
+                </div>
+                
+                {% if review.admin_response %}
+                    <div class="admin-response">
+                        <div class="admin-response-header">
+                            <span class="admin-label">Ответ администратора</span>
+                            <span class="admin-response-date">{{ review.admin_response_formatted_date }}</span>
+                        </div>
+                        <div class="admin-response-content">
+                            {{ review.admin_response }}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if session.get('is_admin') %}
+                    <div class="admin-response-form {% if review.admin_response %}hidden{% endif %}">
+                        <h5>Ответить на отзыв</h5>
+                        <form class="admin-response-form" data-review-id="{{ review.id }}">
+                            <textarea class="form-control" name="response" rows="3" required>{{ review.admin_response or '' }}</textarea>
+                            <button type="submit" class="btn btn-primary">Отправить ответ</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="no-reviews">
+            <p>У этого товара еще нет отзывов. Будьте первым, кто оставит отзыв!</p>
+        </div>
+    {% endif %}
+</div> 

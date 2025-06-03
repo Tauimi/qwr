@@ -1,0 +1,734 @@
+
+{% extends 'layout.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common_stock.css') }}">
+<style>
+    .compare-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .compare-actions {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .compare-action-btn {
+        padding: 8px 15px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .compare-action-btn:hover {
+        background: #e9ecef;
+    }
+    
+    .compare-categories {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .compare-category {
+        padding: 5px 15px;
+        background: #f8f9fa;
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        cursor: pointer;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .compare-category.active {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .compare-category .count {
+        background: rgba(0,0,0,0.1);
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+    
+    .compare-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background: white;
+        box-shadow: var(--box-shadow);
+    }
+
+    .compare-table th,
+    .compare-table td {
+        padding: 15px;
+        border: 1px solid #eee;
+        text-align: left;
+    }
+
+    .compare-table th {
+        background: #f8f9fa;
+        font-weight: bold;
+    }
+
+    .compare-table tr:hover {
+        background: #f8f9fa;
+    }
+    
+    .compare-table tr.different {
+        background: #fff8e1;
+    }
+
+    .product-cell {
+        width: 200px;
+    }
+
+    .product-image {
+        width: 150px;
+        height: 150px;
+        object-fit: contain;
+        margin-bottom: 10px;
+    }
+
+    .product-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .product-price {
+        color: var(--primary-color);
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .remove-compare {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        padding: 5px;
+        font-size: 16px;
+    }
+
+    .remove-compare:hover {
+        color: #c82333;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: var(--box-shadow);
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h2 {
+        margin-bottom: 15px;
+        color: #343a40;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 20px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 10px 20px;
+        background: var(--primary-color);
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background: #0056b3;
+    }
+    
+    .switch-container {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+        margin-left: 10px;
+    }
+    
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 34px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .different-products-notice {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        display: none;
+    }
+    
+    /* Сравнение внутри таблицы */
+    .compare-ratings {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 15px 0;
+    }
+    
+    .rating-row {
+        display: flex;
+        align-items: center;
+    }
+    
+    .rating-name {
+        width: 150px;
+        font-size: 14px;
+    }
+    
+    .rating-stars {
+        color: #ffc107;
+    }
+    
+    /* Общий стиль для обоих видов сравнения */
+    .comparison-view {
+        display: none;
+    }
+    
+    .comparison-view.active {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Сравнение товаров</h1>
+    </div>
+    
+    {% if products %}
+    <!-- Отладочная информация -->
+    <div style="margin-bottom: 20px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; display: none;">
+        <h4>Отладочная информация:</h4>
+        <p>Количество товаров для сравнения: {{ products|length }}</p>
+        {% for product in products %}
+        <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">
+            <p><strong>Товар:</strong> {{ product.name }} (ID: {{ product.id }})</p>
+            <p><strong>Категория:</strong> {{ product.category.name }}</p>
+            <p><strong>Характеристики ({{ product.specifications|length }}):</strong></p>
+            <ul>
+                {% for spec in product.specifications %}
+                <li>{{ spec.name }}: {{ spec.value }}</li>
+                {% else %}
+                <li>Нет характеристик</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if products %}
+    <div class="compare-container">
+        <div class="compare-header">
+            <div class="compare-actions">
+                <button type="button" class="compare-action-btn" id="clear-all">
+                    <i class="fas fa-trash-alt"></i> Удалить всё
+                </button>
+                <button type="button" class="compare-action-btn" id="share-compare">
+                    <i class="fas fa-share-alt"></i> Поделиться
+                </button>
+                <button type="button" class="compare-action-btn" id="add-product">
+                    <i class="fas fa-plus"></i> Добавить товар
+                </button>
+            </div>
+        </div>
+        
+        {% set categories = {} %}
+        {% for product in products %}
+            {% if product.category_id not in categories %}
+                {% if categories.update({product.category_id: {'name': product.category.name, 'count': 1}}) %}{% endif %}
+            {% else %}
+                {% if categories.update({product.category_id: {'name': product.category.name, 'count': categories[product.category_id]['count'] + 1}}) %}{% endif %}
+            {% endif %}
+        {% endfor %}
+        
+        {% if categories|length > 1 %}
+            <div class="different-products-notice" style="display: block;">
+                <i class="fas fa-exclamation-circle"></i> Обратите внимание: вы сравниваете товары из разных категорий. Некоторые характеристики могут отсутствовать.
+            </div>
+        {% endif %}
+        
+        <div class="compare-categories">
+            <div class="compare-category active" data-view="all">
+                <span>Все товары</span>
+                <span class="count">{{ products|length }}</span>
+            </div>
+            {% for cat_id, cat_info in categories.items() %}
+                <div class="compare-category" data-view="category-{{ cat_id }}">
+                    <span>{{ cat_info.name }}</span>
+                    <span class="count">{{ cat_info.count }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if categories|length == 1 %}
+            <!-- Для товаров из одной категории используем таблицу с характеристиками -->
+            <div class="comparison-view active" id="view-all">
+                <div class="switch-container">
+                    <span>Показывать только различающиеся</span>
+                    <label class="switch">
+                        <input type="checkbox" id="show-differences-only">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <table class="compare-table" id="same-category-table">
+                    <thead>
+                        <tr>
+                            <th>Характеристика</th>
+                            {% for product in products %}
+                            <th class="product-cell">
+                                <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="product-image">
+                                <div class="product-title">{{ product.name }}</div>
+                                <div class="product-price">{{ product.price }} ₽</div>
+                                <button type="button" class="remove-compare" data-product-id="{{ product.id }}" onclick="removeFromCompare({{ product.id }})" aria-label="Удалить из сравнения" title="Удалить из сравнения">
+                                    <i class="fas fa-times"></i> Удалить
+                                </button>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>Категория</th>
+                            {% for product in products %}
+                            <td>{{ product.category.name }}</td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <th>Наличие</th>
+                            {% for product in products %}
+                            <td>
+                                {% if product.stock > 5 %}
+                                    В наличии
+                                {% elif product.stock > 0 %}
+                                    Осталось {{ product.stock }} шт.
+                                {% else %}
+                                    Нет в наличии
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <tr>
+                            <th>Описание</th>
+                            {% for product in products %}
+                            <td>{{ product.description }}</td>
+                            {% endfor %}
+                        </tr>
+                        
+                        <!-- Характеристики товаров (в конце таблицы) -->
+                        {% if all_specifications %}
+                            <tr>
+                                <th colspan="{{ products|length + 1 }}" style="background-color: #e9ecef; text-align: center;">Характеристики ({{ all_specifications|length }})</th>
+                            </tr>
+                            
+                            {% for spec_name in all_specifications %}
+                                <tr class="spec-row" data-spec="{{ spec_name }}">
+                                    <th>{{ spec_name }}</th>
+                                    {% for product in products %}
+                                        <td>
+                                            {% set spec_value = "-" %}
+                                            {% for product_spec in product.specifications %}
+                                                {% if product_spec.name == spec_name %}
+                                                    {% set spec_value = product_spec.value %}
+                                                {% endif %}
+                                            {% endfor %}
+                                            {{ spec_value }}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <th colspan="{{ products|length + 1 }}" style="background-color: #f8d7da; text-align: center;">
+                                    Характеристики отсутствуют или не удалось загрузить
+                                </th>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <!-- Для всех товаров (из разных категорий) используем одну таблицу -->
+            <div class="comparison-view active" id="view-all">
+                <table class="compare-table" id="diff-category-table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Категория</th>
+                            <th>Цена</th>
+                            <th>Наличие</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr data-category="{{ product.category_id }}">
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" style="width: 80px; height: 80px; object-fit: contain;">
+                                    <div>
+                                        <div class="product-title">{{ product.name }}</div>
+                                        <div style="font-size: 13px; color: #666;">{{ product.description|truncate(100) }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ product.category.name }}</td>
+                            <td class="product-price">{{ product.price }} ₽</td>
+                            <td>
+                                {% if product.stock > 5 %}
+                                    В наличии
+                                {% elif product.stock > 0 %}
+                                    Осталось {{ product.stock }} шт.
+                                {% else %}
+                                    Нет в наличии
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button type="button" class="remove-compare" data-product-id="{{ product.id }}" onclick="removeFromCompare({{ product.id }})" aria-label="Удалить из сравнения" title="Удалить из сравнения">
+                                    <i class="fas fa-times"></i> Удалить
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Создаем отдельные представления для каждой категории -->
+            {% for cat_id, cat_info in categories.items() %}
+                <div class="comparison-view" id="view-category-{{ cat_id }}">
+                    <div class="switch-container">
+                        <span>Показывать только различающиеся</span>
+                        <label class="switch">
+                            <input type="checkbox" class="show-diff-only" data-category="{{ cat_id }}">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    
+                    <table class="compare-table category-table" id="category-{{ cat_id }}-table">
+                        <thead>
+                            <tr>
+                                <th>Характеристика</th>
+                                {% for product in products if product.category_id == cat_id %}
+                                <th class="product-cell">
+                                    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="product-image">
+                                    <div class="product-title">{{ product.name }}</div>
+                                    <div class="product-price">{{ product.price }} ₽</div>
+                                    <button type="button" class="remove-compare" data-product-id="{{ product.id }}" onclick="removeFromCompare({{ product.id }})" aria-label="Удалить из сравнения" title="Удалить из сравнения">
+                                        <i class="fas fa-times"></i> Удалить
+                                    </button>
+                                </th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Наличие</th>
+                                {% for product in products if product.category_id == cat_id %}
+                                <td>
+                                    {% if product.stock > 5 %}
+                                        В наличии
+                                    {% elif product.stock > 0 %}
+                                        Осталось {{ product.stock }} шт.
+                                    {% else %}
+                                        Нет в наличии
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <tr>
+                                <th>Описание</th>
+                                {% for product in products if product.category_id == cat_id %}
+                                <td>{{ product.description }}</td>
+                                {% endfor %}
+                            </tr>
+                            
+                            <!-- Характеристики товаров из этой категории (в конце таблицы) -->
+                            {% if cat_id in categories_data %}
+                                {% set category_products = categories_data[cat_id]['products'] %}
+                                {% set cat_specs = categories_data[cat_id]['specifications'] %}
+                                
+                                {% if cat_specs %}
+                                    <tr>
+                                        <th colspan="{{ category_products|length + 1 }}" style="background-color: #e9ecef; text-align: center;">Характеристики ({{ cat_specs|length }})</th>
+                                    </tr>
+                                    
+                                    {% for spec_name in cat_specs %}
+                                        <tr class="spec-row" data-spec="{{ spec_name }}">
+                                            <th>{{ spec_name }}</th>
+                                            {% for product in category_products %}
+                                                <td>
+                                                    {% set spec_value = "-" %}
+                                                    {% for product_spec in product.specifications %}
+                                                        {% if product_spec.name == spec_name %}
+                                                            {% set spec_value = product_spec.value %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                    {{ spec_value }}
+                                                </td>
+                                            {% endfor %}
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <th colspan="{{ category_products|length + 1 }}" style="background-color: #f8d7da; text-align: center;">
+                                            Характеристики категории отсутствуют или не загружены
+                                        </th>
+                                    </tr>
+                                {% endif %}
+                            {% else %}
+                                <tr>
+                                    <th colspan="{{ products|length + 1 }}" style="background-color: #f8d7da; text-align: center;">
+                                        Ошибка загрузки данных категории
+                                    </th>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <i class="fas fa-balance-scale"></i>
+        </div>
+        <h2>Нет товаров для сравнения</h2>
+        <p>Добавляйте товары для сравнения, чтобы выбрать лучший вариант.</p>
+        <a href="{{ url_for('shop.catalog') }}" class="btn">Перейти в каталог</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function removeFromCompare(productId) {
+        fetch(`/compare/remove/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Обновляем страницу после удаления
+                window.location.reload();
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при удалении из сравнения:', error);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчик удаления всех товаров
+        document.getElementById('clear-all')?.addEventListener('click', function() {
+            if (confirm('Вы действительно хотите удалить все товары из сравнения?')) {
+                fetch('/compare/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                });
+            }
+        });
+        
+        // Переключение между видами сравнения
+        const categoryButtons = document.querySelectorAll('.compare-category');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const viewId = this.getAttribute('data-view');
+                
+                // Активируем выбранную категорию
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Скрываем все представления и показываем нужное
+                document.querySelectorAll('.comparison-view').forEach(view => {
+                    view.classList.remove('active');
+                });
+                
+                const targetView = document.getElementById('view-' + viewId);
+                if (targetView) {
+                    targetView.classList.add('active');
+                }
+            });
+        });
+        
+        // Обработчик показа только различающихся характеристик
+        const diffCheckboxes = document.querySelectorAll('.show-diff-only, #show-differences-only');
+        diffCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                // Определяем таблицу, к которой относится чекбокс
+                let table;
+                if (this.id === 'show-differences-only') {
+                    table = document.getElementById('same-category-table');
+                } else {
+                    const categoryId = this.getAttribute('data-category');
+                    table = document.getElementById(`category-${categoryId}-table`);
+                }
+                
+                // Подсвечиваем различающиеся характеристики
+                if (table) {
+                    highlightDifferences(table, this.checked);
+                }
+            });
+        });
+        
+        // Функция подсветки различающихся характеристик
+        function highlightDifferences(table, showOnlyDiff) {
+            const specRows = table.querySelectorAll('.spec-row');
+            
+            specRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let values = Array.from(cells).map(cell => cell.textContent.trim());
+                
+                // Проверяем, все ли значения одинаковые
+                let allSame = true;
+                let firstValue = values[0];
+                
+                for (let i = 1; i < values.length; i++) {
+                    if (values[i] !== firstValue) {
+                        allSame = false;
+                        break;
+                    }
+                }
+                
+                // Подсвечиваем строку, если значения различаются
+                if (!allSame) {
+                    row.classList.add('different');
+                } else {
+                    row.classList.remove('different');
+                }
+                
+                // Скрываем одинаковые характеристики, если включен фильтр
+                if (showOnlyDiff) {
+                    row.style.display = allSame ? 'none' : '';
+                } else {
+                    row.style.display = '';
+                }
+            });
+        }
+        
+        // Инициализируем подсветку различий для всех таблиц
+        document.querySelectorAll('.category-table, #same-category-table').forEach(table => {
+            highlightDifferences(table, false);
+        });
+        
+        // Обработчик добавления нового товара
+        document.getElementById('add-product')?.addEventListener('click', function() {
+            window.location.href = '{{ url_for("shop.catalog") }}';
+        });
+        
+        // Обработчик кнопки поделиться
+        document.getElementById('share-compare')?.addEventListener('click', function() {
+            // Генерируем URL для поделиться с текущими товарами
+            const currentUrl = new URL(window.location.href);
+            const compareIds = {{ session.compare|tojson|safe }};
+            
+            if (compareIds && compareIds.length > 0) {
+                currentUrl.searchParams.set('products', compareIds.join(','));
+                
+                // Копируем в буфер обмена
+                navigator.clipboard.writeText(currentUrl.toString())
+                    .then(() => {
+                        alert('Ссылка скопирована в буфер обмена');
+                    })
+                    .catch(err => {
+                        console.error('Не удалось скопировать ссылку: ', err);
+                    });
+            }
+        });
+    });
+</script>
+{% endblock %}

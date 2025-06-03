@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">404</div>
+    <h1>Страница не найдена</h1>
+    <p>Извините, но запрашиваемая вами страница не существует.</p>
+    <p>Возможно, вы перешли по устаревшей ссылке или неправильно ввели адрес.</p>
+    <div class="error-actions">
+        <a href="{{ url_for('shop.home') }}" class="btn">Вернуться на главную</a>
+        <a href="{{ url_for('shop.catalog') }}" class="btn">Перейти в каталог</a>
+    </div>
+</div>
+{% endblock %} 

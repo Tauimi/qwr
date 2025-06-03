@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Админ-панель</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('admin.index') }}"><i class="fas fa-tachometer-alt"></i> Главная</a></li>
+                    <li><a href="{{ url_for('admin.products') }}"><i class="fas fa-box"></i> Товары</a></li>
+                    <li><a href="{{ url_for('admin.categories') }}"><i class="fas fa-list"></i> Категории</a></li>
+                    <li><a href="{{ url_for('admin.users') }}"><i class="fas fa-users"></i> Пользователи</a></li>
+                    <li><a href="{{ url_for('admin.orders') }}"><i class="fas fa-shopping-cart"></i> Заказы</a></li>
+                    <li><a href="{{ url_for('shop.home') }}"><i class="fas fa-home"></i> На сайт</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="content">
+            <div class="header">
+                <div class="search">
+                    <input type="text" placeholder="Поиск...">
+                    <button title="Поиск"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+            <div class="main-content">
+                <h2>Панель управления</h2>
+
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-shopping-bag"></i></div>
+                        <div class="stat-info">
+                            <h3>0</h3>
+                            <p>Всего товаров</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>0</h3>
+                            <p>Пользователей</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                        <div class="stat-info">
+                            <h3>0</h3>
+                            <p>Заказов</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="stat-info">
+                            <h3>0 ₽</h3>
+                            <p>Прибыль</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-actions">
+                    <h3>Последние действия</h3>
+                    <p>Пока нет действий</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+```

@@ -1,0 +1,341 @@
+{% extends 'admin/layout.html' %}
+
+{% block content %}
+<div class="admin-container">
+    <h1>Редактирование товара</h1>
+    
+    <form method="POST" enctype="multipart/form-data" class="admin-form">
+        <div class="form-group">
+            <label for="name">Название товара</label>
+            <input type="text" id="name" name="name" value="{{ product.name }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="sku">Артикул</label>
+            <input type="text" id="sku" name="sku" value="{{ product.sku or '' }}" placeholder="Например: ABC-12345">
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <textarea id="description" name="description" rows="4">{{ product.description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="price">Цена</label>
+            <input type="number" id="price" name="price" value="{{ product.price }}" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+            <label for="old_price">Старая цена (для скидки)</label>
+            <input type="number" id="old_price" name="old_price" value="{{ product.old_price or '' }}" step="0.01">
+        </div>
+
+        <div class="form-group">
+            <label for="stock">Количество на складе</label>
+            <input type="number" id="stock" name="stock" value="{{ product.stock }}" required>
+        </div>
+
+        <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_featured" {% if product.is_featured %}checked{% endif %}> 
+                Рекомендуемый товар
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_new" {% if product.is_new %}checked{% endif %}> 
+                Новинка
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" name="is_sale" {% if product.is_sale %}checked{% endif %}> 
+                Распродажа
+            </label>
+        </div>
+        
+        <div class="form-group">
+            <label for="category_id">Категория</label>
+            <select id="category_id" name="category_id" required>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="image">Главное изображение товара</label>
+            <div class="image-upload-container">
+                <div class="image-preview-wrapper">
+                    {% if product.image %}
+                    <div class="image-preview">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="Текущее изображение" id="imagePreview">
+                        <button type="button" class="remove-image" data-image="{{ product.image }}"><i class="fas fa-times"></i></button>
+                    </div>
+                    {% else %}
+                    <div class="image-preview empty" id="emptyPreview">
+                        <i class="fas fa-image"></i>
+                        <span>Нет изображения</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="upload-controls">
+                    <label for="image" class="upload-btn">
+                        <i class="fas fa-upload"></i> Выбрать изображение
+                    </label>
+                    <input type="file" id="image" name="image" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                    <p class="upload-hint">Рекомендуемый размер: 800x800px. Максимальный размер: 5MB</p>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+        function previewImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const emptyPreview = document.getElementById('emptyPreview');
+                    if (emptyPreview) {
+                        // Если нет текущего изображения, создаем превью
+                        const imagePreviewWrapper = document.querySelector('.image-preview-wrapper');
+                        imagePreviewWrapper.innerHTML = `
+                            <div class="image-preview">
+                                <img src="${e.target.result}" alt="Предпросмотр" id="imagePreview">
+                                <button type="button" class="remove-image" onclick="clearPreview()"><i class="fas fa-times"></i></button>
+                            </div>
+                        `;
+                    } else {
+                        // Если есть текущее изображение, обновляем его
+                        const imagePreview = document.getElementById('imagePreview');
+                        imagePreview.src = e.target.result;
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function clearPreview() {
+            const input = document.getElementById('image');
+            input.value = "";
+            const imagePreviewWrapper = document.querySelector('.image-preview-wrapper');
+            imagePreviewWrapper.innerHTML = `
+                <div class="image-preview empty" id="emptyPreview">
+                    <i class="fas fa-image"></i>
+                    <span>Нет изображения</span>
+                </div>
+            `;
+        }
+        </script>
+        
+        <div class="form-group">
+            <label>Характеристики товара</label>
+            <div id="specifications-container">
+                {% if product.category and product.category.specification_templates %}
+                    {% for template in product.category.specification_templates %}
+                        {% set spec_value = None %}
+                        {% for spec in product.specifications %}
+                            {% if spec.name == template.name %}
+                                {% set spec_value = spec.value %}
+                            {% endif %}
+                        {% endfor %}
+                        <div class="specification-row">
+                            <div class="spec-name">{{ template.name }}</div>
+                            <input type="hidden" name="spec_key_{{ loop.index }}" value="{{ template.name }}">
+                            <input type="text" name="spec_value_{{ loop.index }}" value="{{ spec_value or '' }}" 
+                                   placeholder="Значение" {% if template.required %}required{% endif %}>
+                            {% if template.description %}
+                            <div class="spec-description" title="{{ template.description }}">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                <!-- Дополнительные характеристики -->
+                <div id="custom-specifications">
+                    {% if product.specifications %}
+                        {% for spec in product.specifications %}
+                            {% set is_template = False %}
+                            {% if product.category and product.category.specification_templates %}
+                                {% for template in product.category.specification_templates %}
+                                    {% if spec.name == template.name %}
+                                        {% set is_template = True %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                            
+                            {% if not is_template %}
+                            <div class="specification-row custom">
+                                <input type="text" name="custom_spec_key_{{ loop.index }}" value="{{ spec.name }}" placeholder="Название характеристики">
+                                <input type="text" name="custom_spec_value_{{ loop.index }}" value="{{ spec.value }}" placeholder="Значение">
+                                <button type="button" class="remove-specification" data-key="{{ spec.name }}">Удалить</button>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            <button type="button" id="add-specification" class="btn-secondary">Добавить дополнительную характеристику</button>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Сохранить изменения</button>
+            <a href="{{ url_for('admin.products') }}" class="btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const customContainer = document.getElementById('custom-specifications');
+    const addButton = document.getElementById('add-specification');
+    let customSpecCount = document.querySelectorAll('#custom-specifications .specification-row').length;
+    
+    addButton.addEventListener('click', function() {
+        customSpecCount++;
+        const row = document.createElement('div');
+        row.className = 'specification-row custom';
+        row.innerHTML = `
+            <input type="text" name="custom_spec_key_${customSpecCount}" placeholder="Название характеристики">
+            <input type="text" name="custom_spec_value_${customSpecCount}" placeholder="Значение">
+            <button type="button" class="remove-specification">Удалить</button>
+        `;
+        customContainer.appendChild(row);
+    });
+    
+    document.getElementById('specifications-container').addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-specification')) {
+            const row = e.target.closest('.specification-row');
+            const key = e.target.dataset.key;
+            
+            if (key) {
+                // Удаление существующей характеристики через AJAX
+                fetch(`/admin/products/{{ product.id }}/remove_specification`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `key=${encodeURIComponent(key)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        row.remove();
+                    }
+                });
+            } else {
+                // Удаление новой, еще не сохраненной характеристики
+                row.remove();
+            }
+        }
+    });
+    
+    // Обновление характеристик при изменении категории
+    document.getElementById('category_id').addEventListener('change', function() {
+        const categoryId = this.value;
+        if (categoryId) {
+            fetch(`/admin/categories/${categoryId}/spec_templates`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const specsContainer = document.getElementById('specifications-container');
+                    
+                    // Сохраняем текущие значения пользовательских характеристик
+                    const customSpecs = document.getElementById('custom-specifications');
+                    
+                    // Очищаем только шаблонные характеристики, оставляя пользовательские
+                    Array.from(specsContainer.querySelectorAll('.specification-row:not(.custom)')).forEach(row => {
+                        row.remove();
+                    });
+                    
+                    // Добавляем характеристики из шаблонов
+                    let html = '';
+                    data.templates.forEach((template, index) => {
+                        html += `
+                            <div class="specification-row">
+                                <div class="spec-name">${template.name}</div>
+                                <input type="hidden" name="spec_key_${index+1}" value="${template.name}">
+                                <input type="text" name="spec_value_${index+1}" value="" placeholder="Значение" ${template.required ? 'required' : ''}>
+                                ${template.description ? `
+                                <div class="spec-description" title="${template.description}">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    // Вставляем перед контейнером пользовательских спецификаций
+                    customSpecs.insertAdjacentHTML('beforebegin', html);
+                }
+            });
+        }
+    });
+});
+</script>
+
+<style>
+.specification-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.specification-row input {
+    flex: 1;
+}
+
+.spec-name {
+    min-width: 150px;
+    font-weight: 500;
+}
+
+.spec-description {
+    color: #007bff;
+    cursor: help;
+}
+
+.remove-specification {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-specification:hover {
+    background: #c82333;
+}
+
+#add-specification {
+    margin-top: 10px;
+}
+
+.current-image {
+    margin-top: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkbox-label {
+    margin-bottom: 5px;
+}
+
+#custom-specifications {
+    margin-top: 20px;
+    border-top: 1px dashed #ddd;
+    padding-top: 15px;
+}
+
+#custom-specifications:before {
+    content: "Дополнительные характеристики";
+    display: block;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+</style>
+{% endblock %}

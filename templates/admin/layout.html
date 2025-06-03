@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Админ-панель{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Админ-панель</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('admin.index') }}"><i class="fas fa-tachometer-alt"></i> <span>Главная</span></a></li>
+                    <li><a href="{{ url_for('admin.products') }}"><i class="fas fa-box"></i> <span>Товары</span></a></li>
+                    <li><a href="{{ url_for('admin.categories') }}"><i class="fas fa-list"></i> <span>Категории</span></a></li>
+                    <li><a href="{{ url_for('admin.users') }}"><i class="fas fa-users"></i> <span>Пользователи</span></a></li>
+                    <li><a href="{{ url_for('admin.orders') }}"><i class="fas fa-shopping-cart"></i> <span>Заказы</span></a></li>
+                    <li><a href="{{ url_for('shop.home') }}"><i class="fas fa-home"></i> <span>На сайт</span></a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="content">
+            <div class="header">
+                <div class="search">
+                    <input type="text" placeholder="Поиск..." id="admin-search">
+                    <button title="Поиск"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-info">
+                    <span>{{ session.get('username', 'Администратор') }}</span>
+                    <a href="{{ url_for('auth.logout') }}" title="Выйти"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+            <div class="main-content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, message in messages %}
+                                <div class="flash-message flash-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Очистка флеш-сообщений через 5 секунд
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.opacity = '0';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 500);
+            });
+        }, 5000);
+        
+        // Поиск в админке
+        document.getElementById('admin-search').addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                const searchTerm = this.value.trim().toLowerCase();
+                if (searchTerm) {
+                    // Определяем текущую страницу и перенаправляем поиск
+                    const currentPath = window.location.pathname;
+                    
+                    if (currentPath.includes('/products')) {
+                        window.location.href = `${window.location.origin}/admin/products?q=${encodeURIComponent(searchTerm)}`;
+                    } else if (currentPath.includes('/categories')) {
+                        window.location.href = `${window.location.origin}/admin/categories?q=${encodeURIComponent(searchTerm)}`;
+                    } else if (currentPath.includes('/users')) {
+                        window.location.href = `${window.location.origin}/admin/users?q=${encodeURIComponent(searchTerm)}`;
+                    } else if (currentPath.includes('/orders')) {
+                        window.location.href = `${window.location.origin}/admin/orders?q=${encodeURIComponent(searchTerm)}`;
+                    } else {
+                        // По умолчанию ищем товары
+                        window.location.href = `${window.location.origin}/admin/products?q=${encodeURIComponent(searchTerm)}`;
+                    }
+                }
+            }
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

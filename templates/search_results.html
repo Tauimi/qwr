@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Результаты поиска</h1>
+        <p>По запросу "{{ query }}" {{ products|length }} товаров</p>
+    </div>
+    
+    <div class="search-controls">
+        <form action="{{ url_for('shop.search') }}" method="get" class="search-filter-form">
+            <input type="hidden" name="query" value="{{ query }}">
+            
+            <div class="filter-group">
+                <label for="sort">Сортировать по:</label>
+                <select name="sort" id="sort" class="form-control">
+                    <option value="relevance">Релевантности</option>
+                    <option value="price_asc">Цена (по возрастанию)</option>
+                    <option value="price_desc">Цена (по убыванию)</option>
+                    <option value="name_asc">Название (А-Я)</option>
+                    <option value="name_desc">Название (Я-А)</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn">Применить</button>
+        </form>
+    </div>
+    
+    {% if products %}
+    <div class="products">
+        {% for product in products %}
+        <div class="product-card animate-fade-in">
+            <div class="product-image">
+                <a href="{{ url_for('shop.product', product_id=product.id) }}">
+                    <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}">
+                </a>
+            </div>
+            <div class="product-info">
+                <div class="product-title">
+                    <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                </div>
+                <div class="product-category">
+                    <a href="{{ url_for('shop.category', category_id=product.category_id) }}">{{ product.category.name }}</a>
+                </div>
+                <div class="product-price">{{ product.price }} ₽</div>
+                <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit" class="add-to-cart">В корзину</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-results">
+        <div class="no-results-icon">
+            <i class="fas fa-search"></i>
+        </div>
+        <h2>Ничего не найдено</h2>
+        <p>К сожалению, по вашему запросу "{{ query }}" ничего не найдено. Попробуйте изменить запрос или просмотреть наш каталог товаров.</p>
+        <a href="{{ url_for('shop.catalog') }}" class="btn">Перейти в каталог</a>
+    </div>
+    {% endif %}
+    
+    {% if related_queries %}
+    <div class="related-queries">
+        <h3>Похожие запросы:</h3>
+        <ul class="related-queries-list">
+            {% for related_query in related_queries %}
+            <li><a href="{{ url_for('shop.search', query=related_query) }}">{{ related_query }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+{% endblock %} 

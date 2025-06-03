@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Контакты</h1>
+    </div>
+    
+    <div class="contact-container">
+        <div class="contact-info">
+            <div class="contact-block">
+                <h3><i class="fas fa-map-marker-alt"></i> Адрес</h3>
+                <p>г. Москва, ул. Тверская, 10</p>
+                <p>Ежедневно с 9:00 до 21:00</p>
+            </div>
+            
+            <div class="contact-block">
+                <h3><i class="fas fa-phone"></i> Телефон</h3>
+                <p>8 (800) 123-45-67</p>
+                <p>8 (495) 123-45-67</p>
+            </div>
+            
+            <div class="contact-block">
+                <h3><i class="fas fa-envelope"></i> Email</h3>
+                <p>info@tehnomarket.ru</p>
+                <p>support@tehnomarket.ru</p>
+            </div>
+            
+            <div class="contact-block">
+                <h3><i class="fas fa-network-wired"></i> Социальные сети</h3>
+                <div class="social-links">
+                    <a href="#" target="_blank"><i class="fab fa-vk"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                    <a href="#" target="_blank"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="contact-form-wrapper">
+            <h2>Форма обратной связи</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form class="contact-form" action="{{ url_for('feedback.submit') }}" method="post">
+                <input type="hidden" name="recipient_email" value="qqdslk@gmail.com">
+
+                <div class="form-group">
+                    <label for="name">Ваше имя</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Телефон</label>
+                    <input type="tel" id="phone" name="phone" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Сообщение</label>
+                    <textarea id="message" name="message" class="form-control" rows="5" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-button">Отправить сообщение</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="map-container">
+        <h2>Мы на карте</h2>
+        <div class="map-placeholder">
+            <!-- Здесь будет карта. В реальном проекте можно использовать Яндекс.Карты или Google Maps -->
+            <div class="map-content">
+                <p>Интерактивная карта отключена в демо-режиме.</p>
+                <p>В реальном проекте здесь будет карта с указанием местоположения магазина.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                    <h2 class="card-title mt-3">Заказ успешно оформлен!</h2>
+                    <p class="card-text">Номер вашего заказа: <strong>{{ order.id }}</strong></p>
+                    <p>Сумма заказа: <strong>{{ order.total_amount|round(2) }} руб.</strong></p>
+                    <p>Мы отправили информацию о заказе на вашу электронную почту.</p>
+                    <p>Наш менеджер свяжется с вами в ближайшее время для подтверждения заказа.</p>
+                    <div class="mt-4">
+                        <a href="{{ url_for('shop.home') }}" class="btn btn-primary">Вернуться на главную</a>
+                        {% if session.get('user_id') %}
+                        <a href="{{ url_for('order.detail', order_id=order.id) }}" class="btn btn-outline-primary">Детали заказа</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

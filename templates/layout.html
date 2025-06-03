@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Интернет-магазин{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/header.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/footer.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/products.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cart.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+    <!-- Добавляем класс default-theme для предотвращения мигания при загрузке -->
+    <script>
+        // Проверяем сохраненные настройки темы
+        const isDarkTheme = localStorage.getItem('dark-theme') === 'true';
+        const isEasyReadingMode = localStorage.getItem('easy-reading-mode') === 'true';
+
+        // Применяем классы перед загрузкой страницы
+        if (isDarkTheme) {
+            document.documentElement.classList.add('dark-theme');
+        }
+
+        if (isEasyReadingMode) {
+            document.documentElement.classList.add('large-font', 'high-contrast');
+        }
+    </script>
+</head>
+<body class="default-theme {% if 'user_id' in session %}logged-in{% endif %}">
+    {% include 'header.html' %}
+
+    <div class="container">
+        <!-- Кнопки темы перенесены в шапку -->
+
+        <!-- Флеш-сообщения -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span class="message-text">{{ message }}</span>
+                            <button type="button" class="close-btn" onclick="this.parentElement.style.display='none';">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script>
+  // Обработка глобальных ошибок JavaScript
+  window.addEventListener('error', function(e) {
+    console.error('Глобальная ошибка:', e.message);
+  });
+  
+  // Обеспечение интерактивности после обновления страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    if (document.body) {
+      document.body.classList.add('js-loaded');
+    }
+  });
+</script>
+    <script src="{{ url_for('static', filename='js/cart_indicator.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/compare_indicator.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/clear_flash_messages.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/cart_handler.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

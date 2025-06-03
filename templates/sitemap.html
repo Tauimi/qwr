@@ -1,0 +1,135 @@
+
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Карта сайта</h1>
+    </div>
+    
+    <div class="sitemap-content">
+        <section class="sitemap-section">
+            <h2>Карта сайта</h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('shop.home') }}">Главная страница</a></li>
+                <li>
+                    <a href="{{ url_for('shop.catalog') }}">Каталог товаров</a>
+                    <ul>
+                        {% for category in categories %}
+                        <li>
+                            <a href="{{ url_for('shop.category', category_id=category.id) }}">{{ category.name }}</a>
+                            {% if category.subcategories %}
+                            <ul>
+                                {% for subcategory in category.subcategories %}
+                                <li>
+                                    <a href="{{ url_for('shop.category', category_id=subcategory.id) }}">{{ subcategory.name }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li>
+                    <a href="{{ url_for('shop.catalog') }}">Популярные товары</a>
+                    <ul>
+                        {% for product in popular_products %}
+                        <li>
+                            <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li><a href="{{ url_for('static_pages.about') }}">О компании</a></li>
+                <li><a href="{{ url_for('static_pages.delivery') }}">Доставка и оплата</a></li>
+                <li><a href="{{ url_for('static_pages.contact') }}">Контакты</a></li>
+                <li><a href="{{ url_for('cart.index') }}">Корзина</a></li>
+                <li><a href="{{ url_for('cart.checkout') }}">Оформление заказа</a></li>
+                <li><a href="{{ url_for('shop.search') }}?query=">Поиск</a></li>
+            </ul>
+        </section>
+        
+        <div class="sitemap-section">
+            <h2>Личный кабинет</h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('auth.login') }}">Вход</a></li>
+                <li><a href="{{ url_for('auth.register') }}">Регистрация</a></li>
+                <li><a href="{{ url_for('profile.index') }}">Профиль пользователя</a></li>
+                <li><a href="{{ url_for('profile.edit') }}">Редактирование профиля</a></li>
+                <li><a href="{{ url_for('profile.index') }}">История заказов</a></li>
+                <li><a href="{{ url_for('favorites.index') }}">Избранные товары</a></li>
+                <li><a href="{{ url_for('compare.index') }}">Сравнение товаров</a></li>
+            </ul>
+        </div>
+        
+        <div class="sitemap-section">
+            <h2>Сервис и поддержка</h2>
+            <ul class="sitemap-list">
+                <li><a href="{{ url_for('static_pages.warranty') }}">Гарантия и сервис</a></li>
+                <li><a href="{{ url_for('static_pages.returns') }}">Возврат и обмен</a></li>
+                <li><a href="{{ url_for('static_pages.privacy') }}">Политика конфиденциальности</a></li>
+                <li><a href="{{ url_for('static_pages.terms') }}">Пользовательское соглашение</a></li>
+                <li><a href="{{ url_for('static_pages.faq') }}">Часто задаваемые вопросы</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <style>
+        .sitemap-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 992px) {
+            .sitemap-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sitemap-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .sitemap-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sitemap-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .sitemap-list li {
+            margin-bottom: 10px;
+        }
+        
+        .sitemap-list ul {
+            padding-left: 20px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .sitemap-list a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .sitemap-list a:hover {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
+        .unavailable-link {
+            color: #999;
+            cursor: not-allowed;
+        }
+    </style>
+{% endblock %}

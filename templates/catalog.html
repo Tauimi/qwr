@@ -1,0 +1,201 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Каталог товаров</h1>
+    </div>
+    
+    <!-- Сортировка -->
+    <div class="catalog-controls">
+        <div class="sorting-container">
+            <label for="sort-select">Сортировать по:</label>
+            <select id="sort-select" class="sort-select" onchange="window.location.href = this.value">
+                <option value="{{ url_for('shop.catalog', sort='default') }}" {% if sort_by == 'default' %}selected{% endif %}>По умолчанию</option>
+                <option value="{{ url_for('shop.catalog', sort='rating_high') }}" {% if sort_by == 'rating_high' %}selected{% endif %}>Рейтинг (высокий)</option>
+                <option value="{{ url_for('shop.catalog', sort='rating_low') }}" {% if sort_by == 'rating_low' %}selected{% endif %}>Рейтинг (низкий)</option>
+                <option value="{{ url_for('shop.catalog', sort='reviews_high') }}" {% if sort_by == 'reviews_high' %}selected{% endif %}>Больше положительных отзывов</option>
+                <option value="{{ url_for('shop.catalog', sort='price_high') }}" {% if sort_by == 'price_high' %}selected{% endif %}>Цена (дорогие)</option>
+                <option value="{{ url_for('shop.catalog', sort='price_low') }}" {% if sort_by == 'price_low' %}selected{% endif %}>Цена (дешевые)</option>
+                <option value="{{ url_for('shop.catalog', sort='newest') }}" {% if sort_by == 'newest' %}selected{% endif %}>Новые поступления</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Категории -->
+    <div class="categories-section">
+        <h2>Категории</h2>
+        <div class="categories-grid">
+            {% for category in categories %}
+            <div class="category-card">
+                <div class="category-icon">
+                    <i class="fas 
+                    {% if category.name == 'Смартфоны' %}fa-mobile-alt
+                    {% elif category.name == 'Ноутбуки' %}fa-laptop
+                    {% elif category.name == 'Телевизоры' %}fa-tv
+                    {% elif category.name == 'Холодильники' %}fa-snowflake
+                    {% elif category.name == 'Стиральные машины' %}fa-tshirt
+                    {% else %}fa-box
+                    {% endif %}
+                    "></i>
+                </div>
+                <div class="category-info">
+                    <h3>{{ category.name }}</h3>
+                    <p>{{ category.description }}</p>
+                    <a href="{{ url_for('shop.category', category_id=category.id) }}" class="category-link">Перейти к товарам</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Товары -->
+    {% if products %}
+    <div class="products-section">
+        <h2>Все товары</h2>
+        <div class="products-grid">
+            {% for product_data in products %}
+            {% set product = product_data[0] %}
+            {% set avg_rating = product_data[1] %}
+            {% set total_ratings_count = product_data[2] %}
+            {# positive_reviews_count = product_data[3] - если понадобится #}
+            <div class="product-card animate-fade-in">
+                <div class="product-image">
+                    <a href="{{ url_for('shop.product', product_id=product.id) }}">
+                        <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}">
+                    </a>
+                    
+                    <!-- Индикатор наличия товара -->
+                    <div class="stock-badge {% if product.stock > 5 %}stock-high{% elif product.stock > 0 %}stock-low{% else %}stock-none{% endif %}">
+                        {% if product.stock > 5 %}
+                            В наличии
+                        {% elif product.stock > 0 %}
+                            Осталось {{ product.stock }} шт.
+                        {% else %}
+                            Нет в наличии
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">
+                        <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                    </div>
+                    <div class="product-rating-mini">
+                        <div class="stars">
+                            {% for i in range(1, 6) %}
+                                {% if i <= avg_rating|round(0, 'common') %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <span class="rating-count">({{ total_ratings_count }})</span>
+                    </div>
+                    <div class="product-price">{{ product.price }} ₽</div>
+                    <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="add-to-cart" {% if product.stock <= 0 %}disabled{% endif %}>
+                            {% if product.stock > 0 %}
+                                В корзину
+                            {% else %}
+                                Нет в наличии
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pagination and pagination.pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+      <ul class="pagination justify-content-center">
+        {# Ссылка на предыдущую страницу #}
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.prev_num, sort=sort_by, **request.view_args) if pagination.has_prev else '#_' }}" tabindex="-1" aria-disabled="{{ 'true' if not pagination.has_prev else 'false' }}">
+            &laquo; <span class="d-none d-md-inline">Назад</span>
+          </a>
+        </li>
+
+        {# Ссылки на страницы #}
+        {% for p_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p_num %}
+            {% if p_num == pagination.page %}
+              <li class="page-item active" aria-current="page">
+                <span class="page-link">{{ p_num }}</span>
+              </li>
+            {% else %}
+              <li class="page-item">
+                <a class="page-link" href="{{ url_for(request.endpoint, page=p_num, sort=sort_by, **request.view_args) }}">{{ p_num }}</a>
+              </li>
+            {% endif %}
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {# Ссылка на следующую страницу #}
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+          <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.next_num, sort=sort_by, **request.view_args) if pagination.has_next else '#_'}">
+            <span class="d-none d-md-inline">Вперед</span> &raquo;
+          </a>
+        </li>
+      </ul>
+    </nav>
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .catalog-controls {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .sorting-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .sort-select {
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    
+    .categories-section, .products-section {
+        margin-bottom: 30px;
+    }
+    
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .product-rating-mini {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 5px;
+    }
+    
+    .product-rating-mini .stars {
+        font-size: 0.8em;
+    }
+    
+    .rating-count {
+        font-size: 0.7em;
+        color: #666;
+    }
+</style>
+{% endblock %} 

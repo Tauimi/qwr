@@ -1,0 +1,179 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Доставка и оплата</h1>
+    </div>
+    
+    <div class="delivery-content">
+        <div class="delivery-section">
+            <h2>Способы доставки</h2>
+            
+            <div class="delivery-methods">
+                <div class="delivery-method">
+                    <div class="delivery-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="delivery-info">
+                        <h3>Курьерская доставка</h3>
+                        <p>Доставка товаров курьером до двери в удобное для вас время.</p>
+                        <ul>
+                            <li>Москва и Санкт-Петербург: от 300 ₽</li>
+                            <li>Московская и Ленинградская области: от 500 ₽</li>
+                            <li>Доставка в день заказа или на следующий день (при заказе до 15:00)</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="delivery-method">
+                    <div class="delivery-icon">
+                        <i class="fas fa-store-alt"></i>
+                    </div>
+                    <div class="delivery-info">
+                        <h3>Самовывоз из магазина</h3>
+                        <p>Вы можете забрать заказ самостоятельно в одном из наших магазинов.</p>
+                        <ul>
+                            <li>Бесплатно</li>
+                            <li>Заказ будет готов к выдаче через 1-2 часа (при наличии товара в магазине)</li>
+                            <li>При самовывозе возможна проверка товара на месте</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="delivery-method">
+                    <div class="delivery-icon">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="delivery-info">
+                        <h3>Доставка по России</h3>
+                        <p>Доставка в другие города России осуществляется транспортными компаниями.</p>
+                        <ul>
+                            <li>Стоимость: от 500 ₽ (зависит от региона и веса заказа)</li>
+                            <li>Срок доставки: 2-7 рабочих дней</li>
+                            <li>Трек-номер для отслеживания отправления</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="delivery-method">
+                    <div class="delivery-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <div class="delivery-info">
+                        <h3>Экспресс-доставка</h3>
+                        <p>Срочная доставка товаров в течение нескольких часов.</p>
+                        <ul>
+                            <li>Доступно только в Москве и Санкт-Петербурге</li>
+                            <li>Стоимость: от 600 ₽</li>
+                            <li>Доставка в течение 3-5 часов</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="delivery-note">
+                <p><strong>Обратите внимание:</strong> при заказе на сумму от 5000 ₽ доставка по Москве и Санкт-Петербургу осуществляется бесплатно!</p>
+            </div>
+        </div>
+        
+        <div class="delivery-section">
+            <h2>Способы оплаты</h2>
+            
+            <div class="payment-methods">
+                <div class="payment-method">
+                    <div class="payment-icon">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="payment-info">
+                        <h3>Банковской картой</h3>
+                        <p>Оплата банковской картой на сайте или при получении.</p>
+                        <p>Принимаем карты Visa, MasterCard, МИР.</p>
+                    </div>
+                </div>
+                
+                <div class="payment-method">
+                    <div class="payment-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="payment-info">
+                        <h3>Наличными</h3>
+                        <p>Оплата наличными при получении заказа.</p>
+                        <p>Доступно для курьерской доставки и самовывоза.</p>
+                    </div>
+                </div>
+                
+                <div class="payment-method">
+                    <div class="payment-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <div class="payment-info">
+                        <h3>Банковский перевод для юридических лиц</h3>
+                        <p>Оплата по счету для юридических лиц.</p>
+                        <p>После оформления заказа вам будет выставлен счет.</p>
+                    </div>
+                </div>
+                
+                <div class="payment-method">
+                    <div class="payment-icon">
+                        <i class="fas fa-percentage"></i>
+                    </div>
+                    <div class="payment-info">
+                        <h3>Рассрочка и кредит</h3>
+                        <p>Возможность покупки товаров в рассрочку или кредит.</p>
+                        <p>Партнеры: Сбербанк, Альфа-Банк, Тинькофф Банк.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="delivery-section">
+            <h2>Условия доставки крупногабаритных товаров</h2>
+            <p>Доставка крупногабаритных товаров (холодильники, стиральные машины, телевизоры с диагональю от 50 дюймов и т.д.) имеет некоторые особенности:</p>
+            <ul>
+                <li>Подъем на этаж без лифта оплачивается дополнительно (200 ₽ за этаж)</li>
+                <li>Доставка осуществляется до подъезда, при необходимости занос в квартиру обговаривается отдельно</li>
+                <li>Время доставки согласовывается заранее в интервале 3-4 часа</li>
+            </ul>
+        </div>
+        
+        <div class="delivery-section">
+            <h2>Калькулятор доставки</h2>
+            <p>Рассчитайте стоимость доставки вашего заказа:</p>
+            
+            <div class="delivery-calculator">
+                <form id="delivery-calculator-form">
+                    <div class="form-group">
+                        <label for="delivery-city">Город:</label>
+                        <select id="delivery-city" class="form-control">
+                            <option value="moscow">Москва</option>
+                            <option value="spb">Санкт-Петербург</option>
+                            <option value="moscow-region">Московская область</option>
+                            <option value="other">Другой город России</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delivery-weight">Вес заказа (кг):</label>
+                        <input type="number" id="delivery-weight" class="form-control" min="0.1" step="0.1" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="delivery-sum">Сумма заказа (₽):</label>
+                        <input type="number" id="delivery-sum" class="form-control" min="0" value="0">
+                    </div>
+                    
+                    <button type="button" id="calculate-delivery" class="btn">Рассчитать</button>
+                </form>
+                
+                <div class="delivery-result">
+                    <div id="delivery-cost">Стоимость доставки: <span>0 ₽</span></div>
+                    <div id="delivery-time">Примерное время доставки: <span>-</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/delivery.js') }}"></script>
+{% endblock %} 

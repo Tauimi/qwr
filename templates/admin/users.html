@@ -1,0 +1,257 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Админ-панель</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('admin.index') }}"><i class="fas fa-tachometer-alt"></i> Главная</a></li>
+                    <li><a href="{{ url_for('admin.products') }}"><i class="fas fa-box"></i> Товары</a></li>
+                    <li><a href="{{ url_for('admin.categories') }}"><i class="fas fa-list"></i> Категории</a></li>
+                    <li><a href="{{ url_for('admin.users') }}"><i class="fas fa-users"></i> Пользователи</a></li>
+                    <li><a href="{{ url_for('admin.orders') }}"><i class="fas fa-shopping-cart"></i> Заказы</a></li>
+                    <li><a href="{{ url_for('shop.home') }}"><i class="fas fa-home"></i> На сайт</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="content">
+            <div class="header">
+                <div class="search">
+                    <input type="text" placeholder="Поиск пользователей...">
+                    <button title="Поиск"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+            <div class="main-content">
+                <h2>Управление пользователями</h2>
+
+                <div class="users-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ users|length }}</h3>
+                            <p>Всего пользователей</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ users|selectattr('is_admin', 'eq', true)|list|length }}</h3>
+                            <p>Администраторов</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-actions">
+                    <button class="btn-primary add-new">Добавить пользователя</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Имя пользователя</th>
+                                <th>Email</th>
+                                <th>Имя</th>
+                                <th>Фамилия</th>
+                                <th>Телефон</th>
+                                <th>Статус</th>
+                                <th>Администратор</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.first_name or "-" }}</td>
+                                <td>{{ user.last_name or "-" }}</td>
+                                <td>{{ user.phone or "-" }}</td>
+                                <td>
+                                    <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                        {{ "Активен" if user.is_active else "Неактивен" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge {% if user.is_admin %}status-admin{% else %}status-user{% endif %}">
+                                        {{ "Да" if user.is_admin else "Нет" }}
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <button class="btn-action edit" title="Редактировать" data-id="{{ user.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-action delete" title="Удалить" data-id="{{ user.id }}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Дополнительные стили для страницы пользователей */
+        .users-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .table-actions {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .add-new {
+            padding: 8px 16px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        
+        .admin-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .btn-action.edit {
+            color: #007bff;
+        }
+        
+        .btn-action.delete {
+            color: #dc3545;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-admin {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-user {
+            background-color: #e2e3e5;
+            color: #383d41;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Поиск по таблице
+            const searchInput = document.querySelector('.search input');
+            const tableRows = document.querySelectorAll('.admin-table tbody tr');
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                tableRows.forEach(row => {
+                    const username = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const email = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    const firstName = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                    const lastName = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    
+                    if (username.includes(searchTerm) || 
+                        email.includes(searchTerm) || 
+                        firstName.includes(searchTerm) || 
+                        lastName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Обработчики кнопок (заглушки)
+            document.querySelector('.add-new').addEventListener('click', function() {
+                alert('Функционал добавления пользователя будет доступен позже');
+            });
+            
+            document.querySelectorAll('.btn-action.edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    alert(`Редактирование пользователя ID: ${userId} будет доступно позже`);
+                });
+            });
+            
+            document.querySelectorAll('.btn-action.delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const userId = this.getAttribute('data-id');
+                    if (confirm(`Вы уверены, что хотите удалить пользователя ID: ${userId}?`)) {
+                        alert('Функционал удаления пользователя будет доступен позже');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

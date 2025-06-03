@@ -1,0 +1,147 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>Корзина</h1>
+    </div>
+    
+    {% if cart_items %}
+    <div class="cart-container">
+        <div class="cart-content">
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Цена</th>
+                        <th>Количество</th>
+                        <th>Сумма</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr {% if item.stock_warning and 'Доступно только' in item.stock_warning %}class="stock-warning"{% endif %}>
+                        <td>
+                            <div class="cart-product">
+                                <img src="{{ url_for('static', filename='images/' + item.product.image) }}" alt="{{ item.product.name }}">
+                                <div>
+                                    <a href="{{ url_for('shop.product', product_id=item.product.id) }}">{{ item.product.name }}</a>
+                                    {% if item.stock_warning %}
+                                    <div class="stock-status {% if 'Доступно только' in item.stock_warning %}status-warning{% else %}status-low{% endif %}">
+                                        <i class="fas {% if 'Доступно только' in item.stock_warning %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i> 
+                                        {{ item.stock_warning }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="item-price" data-price="{{ item.product.price }}">{{ item.product.price }} ₽</td>
+                        <td>
+                            <div class="cart-quantity">
+                                <button type="button" class="quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
+                                <input type="number" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" step="1"
+                                       data-product-id="{{ item.product.id }}" aria-label="Количество товара"
+                                       title="Количество товара" {% if item.product.stock < item.quantity %}class="invalid-quantity"{% endif %}>
+                                <button type="button" class="quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
+                            </div>
+                        </td>
+                        <td class="item-subtotal" data-subtotal="{{ item.subtotal }}">{{ item.subtotal }} ₽</td>
+                        <td>
+                            <form action="{{ url_for('cart.remove_from_cart', product_id=item.product.id) }}" method="post">
+                                <button type="submit" class="remove-item">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="cart-actions">
+                <a href="{{ url_for('shop.catalog') }}" class="btn-continue-shopping">Продолжить покупки</a>
+                <form action="{{ url_for('cart.index') }}" method="post">
+                    <button type="submit" class="btn-clear-cart">Очистить корзину</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="cart-sidebar">
+            <div class="cart-total">
+                <h3>Ваш заказ</h3>
+                
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Товары:</span>
+                    <span id="cart-subtotal-value">{{ total }} ₽</span>
+                </div>
+                
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Доставка:</span>
+                    <span id="cart-shipping-value">
+                        {% if total >= 5000 %}
+                            0 ₽ (бесплатно)
+                        {% else %}
+                            500 ₽
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="cart-total-row">
+                    <span class="cart-total-label">Итого:</span>
+                    <span id="cart-total-value">
+                        {% if total >= 5000 %}
+                            {{ total }} ₽
+                        {% else %}
+                            {{ total + 500 }} ₽
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <a href="{{ url_for('cart.checkout') }}" class="checkout-button">Оформить заказ</a>
+            </div>
+            
+            <div class="cart-promocode">
+                <h3>Промокод</h3>
+                <form action="{{ url_for('cart.apply_promocode') }}" method="post">
+                    <div class="form-group">
+                        <input type="text" name="promocode" class="form-control" placeholder="Введите промокод">
+                    </div>
+                    <button type="submit" class="apply-promocode">Применить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-cart">
+        <div class="empty-cart-icon">
+            <i class="fas fa-shopping-cart"></i>
+        </div>
+        <h2>Ваша корзина пуста</h2>
+        <p>Добавьте товары в корзину, чтобы оформить заказ.</p>
+        <a href="{{ url_for('shop.catalog') }}" class="btn">Перейти в каталог</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/cart.js') }}"></script>
+<style>
+    .stock-warning {
+        background-color: #fff8e1;
+    }
+    .stock-status {
+        font-size: 12px;
+        margin-top: 5px;
+    }
+    .status-warning {
+        color: #e53935;
+    }
+    .status-low {
+        color: #ff9800;
+    }
+    .invalid-quantity {
+        border: 1px solid #e53935;
+        background-color: #ffebee;
+    }
+</style>
+{% endblock %} 

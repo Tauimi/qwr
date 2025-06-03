@@ -1,0 +1,471 @@
+{% extends 'layout.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common_stock.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/product_page.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/reviews.css') }}">
+<style>
+    .product-specifications {
+        margin-top: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .specifications-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: var(--primary-color);
+    }
+    
+    .specifications-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .specifications-table tr:nth-child(even) {
+        background: #f8f9fa;
+    }
+    
+    .specifications-table td {
+        padding: 10px;
+        border: 1px solid #eee;
+    }
+    
+    .specifications-table td:first-child {
+        font-weight: bold;
+        width: 40%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="breadcrumbs">
+        <a href="{{ url_for('shop.home') }}">Главная</a> &raquo;
+        <a href="{{ url_for('shop.catalog') }}">Каталог</a> &raquo;
+        <a href="{{ url_for('shop.category', category_id=product.category_id) }}">{{ product.category.name }}</a> &raquo;
+        <span>{{ product.name }}</span>
+    </div>
+    
+    <div class="product-details">
+        <div class="product-gallery">
+            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}">
+        </div>
+        
+        <div class="product-detail-info">
+            <h1 class="product-detail-title">{{ product.name }}</h1>
+            <div class="product-detail-price">{{ product.price }} ₽</div>
+            
+            <div class="product-actions">
+                <div class="favorite-action">
+                    <button type="button" class="favorite-btn {% if product.id in session.get('favorites', []) %}active{% endif %}" 
+                            data-product-id="{{ product.id }}" aria-label="Добавить в избранное" title="Добавить в избранное">
+                        <i class="fas fa-heart"></i>
+                        <span class="favorite-count">{{ session.get('favorites', [])|length }}</span>
+                    </button>
+                </div>
+                
+                <div class="main-actions">
+                    <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
+                        <div class="quantity-control">
+                            <button type="button" class="quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" aria-label="Количество товара" title="Количество товара">
+                            <button type="button" class="quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
+                        </div>
+                        
+                        <div class="cart-controls">
+                            <button type="submit" class="add-to-cart-large">В корзину</button>
+                            <div class="cart-quantity-controls" style="display: none;">
+                                <button type="button" class="cart-quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
+                                <span class="cart-quantity-value">1</span>
+                                <button type="button" class="cart-quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <button type="button" class="compare-btn {% if product.id in session.get('compare', []) %}active{% endif %}" 
+                            data-product-id="{{ product.id }}" aria-label="Добавить к сравнению" title="Добавить к сравнению">
+                        <i class="fas fa-balance-scale"></i>
+                        <span>В сравнение</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="product-description">
+                {{ product.description }}
+            </div>
+            
+            <!-- Форма быстрой оценки товара -->
+            <div class="quick-rating-box">
+                <div class="quick-rating-title">Оцените товар</div>
+                <div class="quick-rating-stars" id="quick-rating-stars">
+                    <div class="star-rating-row">
+                        {% for i in range(1, 6) %}
+                            <span class="quick-star" data-rating="{{ i }}">
+                                <i class="far fa-star"></i>
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="quick-rating-message" id="rating-result">
+                        Нажмите на звезду, чтобы оценить товар
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stock-indicator {% if product.stock > 5 %}in-stock{% elif product.stock > 0 %}low-stock{% else %}out-of-stock{% endif %}">
+                <i class="fas {% if product.stock > 5 %}fa-check-circle{% elif product.stock > 0 %}fa-exclamation-circle{% else %}fa-times-circle{% endif %}"></i>
+                {% if product.stock > 5 %}
+                    <span>В наличии: {{ product.stock }} шт.</span>
+                {% elif product.stock > 0 %}
+                    <span>Внимание! Осталось всего {{ product.stock }} шт.</span>
+                {% else %}
+                    <span>Нет в наличии</span>
+                {% endif %}
+            </div>
+            
+            <div class="product-meta">
+                <div class="product-meta-item">
+                    <strong>Категория:</strong> <a href="{{ url_for('shop.category', category_id=product.category_id) }}">{{ product.category.name }}</a>
+                </div>
+                <div class="product-meta-item">
+                    <strong>Артикул:</strong> {{ product.id }}
+                </div>
+                <div class="product-meta-item">
+                    <strong>Добавлен:</strong> {{ product.created_at.strftime('%d.%m.%Y') }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="related-products">
+        <h2>Похожие товары</h2>
+        <div class="products">
+            {% for related_product in related_products %}
+            <div class="product-card animate-fade-in">
+                <div class="product-image">
+                    <a href="{{ url_for('shop.product', product_id=related_product.id) }}">
+                        <img src="{{ url_for('static', filename='images/' + related_product.image) }}" alt="{{ related_product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + related_product.image) }}">
+                    </a>
+                    
+                    <!-- Индикатор наличия похожих товаров -->
+                    <div class="stock-badge {% if related_product.stock > 5 %}stock-high{% elif related_product.stock > 0 %}stock-low{% else %}stock-none{% endif %}">
+                        {% if related_product.stock > 5 %}
+                            В наличии
+                        {% elif related_product.stock > 0 %}
+                            Осталось {{ related_product.stock }} шт.
+                        {% else %}
+                            Нет в наличии
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-title">
+                        <a href="{{ url_for('shop.product', product_id=related_product.id) }}">{{ related_product.name }}</a>
+                    </div>
+                    <div class="product-price">{{ related_product.price }} ₽</div>
+                    <form action="{{ url_for('cart.add_to_cart', product_id=related_product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ related_product.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button type="submit" class="add-to-cart" {% if related_product.stock <= 0 %}disabled{% endif %}>
+                            {% if related_product.stock > 0 %}
+                                В корзину
+                            {% else %}
+                                Нет в наличии
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <!-- Блок с отзывами -->
+    <div class="product-reviews">
+        <div class="reviews-header">
+            <h2>Отзывы о товаре</h2>
+            <div class="reviews-summary">
+                {% set avg_rating = product.avg_rating %}
+                <div class="average-rating">
+                    <div class="stars">
+                        {% for i in range(1, 6) %}
+                            {% if i <= avg_rating|round(0, 'common') %}
+                                <i class="fas fa-star"></i>
+                            {% elif i - 0.5 <= avg_rating %}
+                                <i class="fas fa-star-half-alt"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="rating-value">{{ avg_rating }}/5</span>
+                </div>
+                <div class="reviews-count">({{ product.total_ratings_count }} оценок)</div>
+                <a href="{{ url_for('reviews.product_reviews', product_id=product.id) }}" class="btn btn-primary">Все отзывы</a>
+            </div>
+        </div>
+        
+        <!-- Последние отзывы (максимум 3) -->
+        <div class="recent-reviews">
+            {% if product.reviews %}
+                {% for review in product.reviews[:3] %}
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="review-user">
+                                <span class="user-name">{{ review.username }}</span>
+                                <span class="review-date">{{ review.formatted_date }}</span>
+                            </div>
+                            <div class="review-rating">
+                                {% for i in range(1, 6) %}
+                                    {% if i <= review.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        {% if review.title %}
+                            <h4 class="review-title">{{ review.title }}</h4>
+                        {% endif %}
+                        
+                        <div class="review-content">
+                            {{ review.content }}
+                        </div>
+                        
+                        <div class="review-footer">
+                            <div class="review-votes">
+                                <button class="vote-btn like-btn" data-review-id="{{ review.id }}" data-vote-type="like">
+                                    <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ review.likes }}</span>
+                                </button>
+                                <button class="vote-btn dislike-btn" data-review-id="{{ review.id }}" data-vote-type="dislike">
+                                    <i class="fas fa-thumbs-down"></i> <span class="dislike-count">{{ review.dislikes }}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-reviews">
+                    <p>У этого товара еще нет отзывов. Будьте первым, кто оставит отзыв!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Форма добавления отзыва -->
+        <div class="add-review-section">
+            <h3>Оставить отзыв</h3>
+            <form class="review-form" action="{{ url_for('reviews.add_review', product_id=product.id) }}" method="post">
+                <div class="rating-input">
+                    <label>Ваша оценка:</label>
+                    <div class="star-rating">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                            <label for="star{{ i }}" title="{{ i }} звезд">
+                                <i class="far fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                {% if not session.get('user_id') %}
+                    <div class="form-group">
+                        <label for="username">Ваше имя</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="review-title">Заголовок отзыва</label>
+                    <input type="text" id="review-title" name="title" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="review-content">Ваш отзыв</label>
+                    <textarea id="review-content" name="content" class="form-control" rows="5" required></textarea>
+                </div>
+                
+                <button type="submit" class="submit-button">Опубликовать отзыв</button>
+            </form>
+        </div>
+    </div>
+    
+    {% if product.specifications %}
+    <div class="product-specifications">
+        <div class="specifications-title">Характеристики</div>
+        <table class="specifications-table">
+            {% for spec in product.specifications %}
+            <tr>
+                <td>{{ spec.name }}</td>
+                <td>{{ spec.value }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/product.js') }}"></script>
+<script>
+    // Скрипт для обработки голосования за отзывы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработка кнопок голосования (лайки/дизлайки)
+        document.querySelectorAll('.vote-btn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const reviewId = this.getAttribute('data-review-id');
+                const voteType = this.getAttribute('data-vote-type');
+                
+                fetch(`/reviews/vote/${reviewId}/${voteType}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем счетчики лайков и дизлайков
+                        document.querySelector(`#review-${reviewId} .like-count`).textContent = data.likes;
+                        document.querySelector(`#review-${reviewId} .dislike-count`).textContent = data.dislikes;
+                    } else {
+                        alert(data.error || 'Произошла ошибка при голосовании');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+            });
+        });
+        
+        // Обработка звездного рейтинга в форме отзыва
+        const ratingInputs = document.querySelectorAll('.star-rating input');
+        ratingInputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                const rating = this.value;
+                // Визуальное отображение выбранного рейтинга
+                ratingInputs.forEach(function(inp) {
+                    const label = inp.nextElementSibling;
+                    if (inp.value <= rating) {
+                        label.classList.add('active');
+                    } else {
+                        label.classList.remove('active');
+                    }
+                });
+            });
+        });
+        
+        // Обработка быстрой оценки товара
+        const quickStars = document.querySelectorAll('.quick-star');
+        const ratingResult = document.getElementById('rating-result');
+        
+        quickStars.forEach(function(star) {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                const productId = {{ product.id }};
+                
+                // Отправляем оценку на сервер
+                fetch(`/reviews/rate/${productId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: `rating=${rating}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Обновляем интерфейс
+                        quickStars.forEach(function(s) {
+                            const starRating = parseInt(s.getAttribute('data-rating'));
+                            if (starRating <= rating) {
+                                s.classList.add('active');
+                                s.querySelector('i').className = 'fas fa-star';
+                            } else {
+                                s.classList.remove('active');
+                                s.querySelector('i').className = 'far fa-star';
+                            }
+                        });
+                        
+                        // Обновляем сообщение с результатом
+                        ratingResult.textContent = `Ваша оценка: ${rating}/5. Спасибо!`;
+                        
+                        // Обновляем общий рейтинг товара, если он отображается на странице
+                        const avgRatingElements = document.querySelectorAll('.rating-value');
+                        avgRatingElements.forEach(function(el) {
+                            el.textContent = data.avg_rating + '/5';
+                        });
+                        
+                        const reviewsCountElements = document.querySelectorAll('.reviews-count');
+                        reviewsCountElements.forEach(function(el) {
+                            el.textContent = `(${data.ratings_count} оценок)`;
+                        });
+                    } else {
+                        ratingResult.textContent = data.error || 'Произошла ошибка при сохранении оценки';
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    ratingResult.textContent = 'Произошла ошибка при сохранении оценки';
+                });
+            });
+            
+            // Предварительный просмотр при наведении
+            star.addEventListener('mouseover', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                
+                quickStars.forEach(function(s) {
+                    const starRating = parseInt(s.getAttribute('data-rating'));
+                    if (starRating <= rating) {
+                        s.querySelector('i').className = 'fas fa-star';
+                    } else {
+                        s.querySelector('i').className = 'far fa-star';
+                    }
+                });
+                
+                ratingResult.textContent = getRatingText(rating);
+            });
+            
+            star.addEventListener('mouseout', function() {
+                // Возвращаем текущее состояние
+                quickStars.forEach(function(s) {
+                    if (s.classList.contains('active')) {
+                        s.querySelector('i').className = 'fas fa-star';
+                    } else {
+                        s.querySelector('i').className = 'far fa-star';
+                    }
+                });
+                
+                if (document.querySelector('.quick-star.active')) {
+                    const activeRating = parseInt(document.querySelector('.quick-star.active:last-child').getAttribute('data-rating'));
+                    ratingResult.textContent = `Ваша оценка: ${activeRating}/5. Спасибо!`;
+                } else {
+                    ratingResult.textContent = 'Нажмите на звезду, чтобы оценить товар';
+                }
+            });
+        });
+        
+        // Функция для получения текстового описания рейтинга
+        function getRatingText(rating) {
+            switch(rating) {
+                case 1:
+                    return 'Очень плохо';
+                case 2:
+                    return 'Плохо';
+                case 3:
+                    return 'Нормально';
+                case 4:
+                    return 'Хорошо';
+                case 5:
+                    return 'Отлично';
+                default:
+                    return '';
+            }
+        }
+    });
+</script>
+{% endblock %}

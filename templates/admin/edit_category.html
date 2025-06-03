@@ -1,0 +1,214 @@
+
+{% extends 'admin/layout.html' %}
+
+{% block content %}
+<div class="admin-container">
+    <h1>Редактирование категории</h1>
+    
+    <form method="POST" enctype="multipart/form-data" class="admin-form">
+        <div class="form-group">
+            <label for="name">Название категории</label>
+            <input type="text" id="name" name="name" value="{{ category.name }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="slug">URL-slug</label>
+            <input type="text" id="slug" name="slug" value="{{ category.slug }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="description">Описание</label>
+            <textarea id="description" name="description" rows="4">{{ category.description }}</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="image">Иконка категории</label>
+            <input type="file" id="image" name="image" accept="image/*">
+            {% if category.image %}
+            <div class="current-image">
+                <img src="{{ url_for('static', filename='images/' + category.image) }}" alt="Текущая иконка" style="max-width: 100px;">
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="form-group">
+            <label>Шаблоны характеристик товаров</label>
+            <p class="form-hint">Добавьте характеристики, которые будут использоваться для товаров этой категории</p>
+            
+            <div id="spec-templates-container">
+                {% if category.specification_templates %}
+                    {% for template in category.specification_templates %}
+                    <div class="spec-template-row">
+                        <input type="text" name="spec_name_{{ loop.index }}" value="{{ template.name }}" placeholder="Название характеристики" required>
+                        <input type="text" name="spec_description_{{ loop.index }}" value="{{ template.description }}" placeholder="Описание (опционально)">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="spec_required_{{ loop.index }}" {% if template.required %}checked{% endif %}> 
+                            Обязательная
+                        </label>
+                        <button type="button" class="remove-template" data-id="{{ template.id }}">Удалить</button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+            <button type="button" id="add-spec-template" class="btn-secondary">Добавить характеристику</button>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Сохранить изменения</button>
+            <a href="{{ url_for('admin.categories') }}" class="btn-secondary">Отмена</a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('spec-templates-container');
+    const addButton = document.getElementById('add-spec-template');
+    let templateCount = {{ category.specification_templates|length if category.specification_templates else 0 }};
+    
+    addButton.addEventListener('click', function() {
+        templateCount++;
+        const row = document.createElement('div');
+        row.className = 'spec-template-row';
+        row.innerHTML = `
+            <input type="text" name="spec_name_${templateCount}" placeholder="Название характеристики" required>
+            <input type="text" name="spec_description_${templateCount}" placeholder="Описание (опционально)">
+            <label class="checkbox-label">
+                <input type="checkbox" name="spec_required_${templateCount}"> 
+                Обязательная
+            </label>
+            <button type="button" class="remove-template">Удалить</button>
+        `;
+        container.appendChild(row);
+    });
+    
+    container.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-template')) {
+            const row = e.target.closest('.spec-template-row');
+            const id = e.target.dataset.id;
+            
+            if (id) {
+                // Удаление существующего шаблона через AJAX
+                fetch(`/admin/categories/remove_spec_template/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        row.remove();
+                    }
+                });
+            } else {
+                // Удаление новой, еще не сохраненной характеристики
+                row.remove();
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.current-image {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.spec-template-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.spec-template-row input[type="text"] {
+    flex: 1;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+.remove-template {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.form-hint {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+</style>
+
+<style>
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.current-image {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    display: inline-block;
+}
+</style>
+{% endblock %}

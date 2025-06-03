@@ -1,0 +1,38 @@
+<!-- Форма добавления отзыва -->
+<div class="review-form-container">
+    <h3>Оставить отзыв</h3>
+    
+    <form class="review-form" action="{{ url_for('reviews.add_review', product_id=product.id) }}" method="post">
+        <div class="rating-input">
+            <label>Ваша оценка:</label>
+            <div class="star-rating">
+                {% for i in range(5, 0, -1) %}
+                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                    <label for="star{{ i }}" title="{{ i }} звезд">
+                        <i class="far fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        
+        {% if not session.get('user_id') %}
+            <div class="form-group">
+                <label for="username">Ваше имя</label>
+                <input type="text" id="username" name="username" class="form-control" required>
+            </div>
+        {% endif %}
+        
+        <div class="form-group">
+            <label for="review-title">Заголовок отзыва</label>
+            <input type="text" id="review-title" name="title" class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label for="review-content">Ваш отзыв</label>
+            <textarea id="review-content" name="content" class="form-control" rows="5" required></textarea>
+        </div>
+        
+        <button type="submit" class="submit-button">Опубликовать отзыв</button>
+    </form>
+</div> 

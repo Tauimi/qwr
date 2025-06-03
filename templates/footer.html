@@ -1,0 +1,57 @@
+<!-- Подвал сайта -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>О компании</h3>
+                <ul class="footer-menu">
+                    <li><a href="{{ url_for('static_pages.about') }}">О нас</a></li>
+                    <li><a href="{{ url_for('static_pages.contact') }}">Контакты</a></li>
+                    <li><a href="{{ url_for('static_pages.delivery') }}">Доставка и оплата</a></li>
+                    <li><a href="{{ url_for('static_pages.returns') }}">Возврат товара</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3>Покупателям</h3>
+                <ul class="footer-menu">
+                    <li><a href="{{ url_for('shop.catalog') }}">Каталог товаров</a></li>
+                    <li><a href="{{ url_for('static_pages.faq') }}">Часто задаваемые вопросы</a></li>
+                    <li><a href="{{ url_for('static_pages.warranty') }}">Гарантия и сервис</a></li>
+                    <li><a href="{{ url_for('static_pages.sitemap') }}">Карта сайта</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3>Личный кабинет</h3>
+                <ul class="footer-menu">
+                    {% if session.user_id %}
+                    <li><a href="{{ url_for('profile.index') }}">Профиль</a></li>
+                    <li><a href="{{ url_for('profile.index') }}">История заказов</a></li>
+                    <li><a href="{{ url_for('favorites.index') }}">Избранное</a></li>
+                    <li><a href="{{ url_for('auth.logout') }}">Выйти</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('auth.login') }}">Войти</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">Зарегистрироваться</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="footer-column">
+                <h3>Контакты</h3>
+                <p><i class="fas fa-map-marker-alt"></i> г. Москва, ул. Примерная, д. 1</p>
+                <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                <p><i class="fas fa-envelope"></i> info@texnomarket.ru</p>
+                <div class="social-links">
+                    <a href="#" title="Вконтакте"><i class="fab fa-vk"></i></a>
+                    <a href="#" title="Телеграм"><i class="fab fa-telegram"></i></a>
+                    <a href="#" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2023 ТехноМаркет. Все права защищены.</p>
+        </div>
+    </div>
+</footer>

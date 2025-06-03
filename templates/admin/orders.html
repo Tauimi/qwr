@@ -1,0 +1,248 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <div class="admin-panel">
+        <div class="sidebar">
+            <div class="logo">
+                <h1>Админ-панель</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('admin.index') }}"><i class="fas fa-tachometer-alt"></i> Главная</a></li>
+                    <li><a href="{{ url_for('admin.products') }}"><i class="fas fa-box"></i> Товары</a></li>
+                    <li><a href="{{ url_for('admin.categories') }}"><i class="fas fa-list"></i> Категории</a></li>
+                    <li><a href="{{ url_for('admin.users') }}"><i class="fas fa-users"></i> Пользователи</a></li>
+                    <li><a href="{{ url_for('admin.orders') }}"><i class="fas fa-shopping-cart"></i> Заказы</a></li>
+                    <li><a href="{{ url_for('shop.home') }}"><i class="fas fa-home"></i> На сайт</a></li>
+                </ul>
+            </nav>
+        </div>
+        <div class="content">
+            <div class="header">
+                <div class="search">
+                    <input type="text" placeholder="Поиск заказов...">
+                    <button title="Поиск"><i class="fas fa-search"></i></button>
+                </div>
+                <div class="user-info">
+                    <span>Администратор</span>
+                    <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                </div>
+            </div>
+            <div class="main-content">
+                <h2>Управление заказами</h2>
+
+                <div class="orders-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ orders|length }}</h3>
+                            <p>Всего заказов</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="stat-info">
+                            <h3>{{ "%0.2f"|format(orders|sum(attribute='total_amount')) }} ₽</h3>
+                            <p>Общая сумма</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Дата</th>
+                                <th>Клиент</th>
+                                <th>Email</th>
+                                <th>Телефон</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.id }}</td>
+                                <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                                <td>{{ order.first_name }} {{ order.last_name }}</td>
+                                <td>{{ order.email }}</td>
+                                <td>{{ order.phone }}</td>
+                                <td>{{ "%0.2f"|format(order.total_amount) }} ₽</td>
+                                <td>
+                                    <span class="status-badge 
+                                        {% if order.status == 'pending' %}status-pending
+                                        {% elif order.status == 'processing' %}status-processing
+                                        {% elif order.status == 'shipped' %}status-shipped
+                                        {% elif order.status == 'delivered' %}status-delivered
+                                        {% elif order.status == 'canceled' %}status-canceled
+                                        {% endif %}">
+                                        {% if order.status == 'pending' %}Ожидает обработки
+                                        {% elif order.status == 'processing' %}В обработке
+                                        {% elif order.status == 'shipped' %}Отправлен
+                                        {% elif order.status == 'delivered' %}Доставлен
+                                        {% elif order.status == 'canceled' %}Отменен
+                                        {% else %}{{ order.status }}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <button class="btn-action view" title="Просмотр" data-id="{{ order.id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-action edit" title="Редактировать" data-id="{{ order.id }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Дополнительные стили для страницы заказов */
+        .orders-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th, .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .admin-table th {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        
+        .admin-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+        
+        .btn-action.view {
+            color: #17a2b8;
+        }
+        
+        .btn-action.edit {
+            color: #007bff;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-processing {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+        
+        .status-shipped {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-delivered {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .status-canceled {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Поиск по таблице
+            const searchInput = document.querySelector('.search input');
+            const tableRows = document.querySelectorAll('.admin-table tbody tr');
+            
+            searchInput.addEventListener('keyup', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                tableRows.forEach(row => {
+                    const orderId = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+                    const date = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                    const client = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                    const email = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                    
+                    if (orderId.includes(searchTerm) || 
+                        date.includes(searchTerm) || 
+                        client.includes(searchTerm) || 
+                        email.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Обработчики кнопок (заглушки)
+            document.querySelectorAll('.btn-action.view').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    alert(`Просмотр деталей заказа ID: ${orderId} будет доступен позже`);
+                });
+            });
+            
+            document.querySelectorAll('.btn-action.edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const orderId = this.getAttribute('data-id');
+                    alert(`Редактирование заказа ID: ${orderId} будет доступно позже`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

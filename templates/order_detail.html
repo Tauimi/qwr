@@ -1,0 +1,96 @@
+
+{% extends 'layout.html' %}
+
+{% block content %}
+    <h1>Детали заказа #{{ order.id }}</h1>
+    
+    <div class="order-details">
+        <div class="order-info">
+            <h2>Информация о заказе</h2>
+            <table class="order-info-table">
+                <tr>
+                    <th>Номер заказа:</th>
+                    <td>#{{ order.id }}</td>
+                </tr>
+                <tr>
+                    <th>Дата заказа:</th>
+                    <td>{{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                </tr>
+                <tr>
+                    <th>Статус:</th>
+                    <td>
+                        <span class="status-badge status-{{ order.status.lower() }}">{{ order.status }}</span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Способ оплаты:</th>
+                    <td>{{ order.payment_method }}</td>
+                </tr>
+                <tr>
+                    <th>Способ доставки:</th>
+                    <td>{{ order.shipping_method }}</td>
+                </tr>
+                <tr>
+                    <th>Итоговая сумма:</th>
+                    <td class="total-amount">{{ order.total_amount }} ₽</td>
+                </tr>
+            </table>
+        </div>
+        
+        <div class="shipping-info">
+            <h2>Адрес доставки</h2>
+            <address>
+                {{ order.full_name }}<br>
+                {{ order.address }}<br>
+                {{ order.city }}, {{ order.postal_code }}<br>
+                {{ order.country }}<br>
+                Телефон: {{ order.phone }}<br>
+                Email: {{ order.email }}
+            </address>
+        </div>
+    </div>
+    
+    <div class="order-items">
+        <h2>Состав заказа</h2>
+        <table class="order-items-table">
+            <thead>
+                <tr>
+                    <th>Товар</th>
+                    <th>Цена</th>
+                    <th>Количество</th>
+                    <th>Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.order_items %}
+                <tr>
+                    <td class="product-cell">
+                        <div class="product-info">
+                            <img src="{{ url_for('static', filename='images/products/' + item.product.image) }}" alt="{{ item.product.name }}" class="product-thumbnail">
+                            <div>
+                                <a href="{{ url_for('shop.product', product_id=item.product.id) }}">{{ item.product.name }}</a>
+                                <span class="product-id">ID: {{ item.product.id }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ item.price }} ₽</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ (item.price * item.quantity) }} ₽</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right"><strong>Итого:</strong></td>
+                    <td>{{ order.total_amount }} ₽</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    
+    <div class="order-actions">
+        <a href="{{ url_for('profile.index') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Вернуться к заказам
+        </a>
+    </div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'layout.html' %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/carousel.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common_stock.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home_page.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Современная карусель баннеров -->
+    <div class="banners-carousel">
+        <div class="banner-slide active light-text" style="background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)), url({{ url_for('static', filename='images/carousel/banner1.jpg') }});">
+            <div class="banner-content">
+                <h2>Новое поступление смартфонов</h2>
+                <p>Скидки до 30% на самые популярные модели</p>
+                <a href="{{ url_for('shop.catalog') }}" class="banner-btn">Смотреть предложения</a>
+            </div>
+        </div>
+        <div class="banner-slide light-text" style="background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)), url({{ url_for('static', filename='images/carousel/banner2.jpg') }});">
+            <div class="banner-content">
+                <h2>Ноутбуки для учебы</h2>
+                <p>Специальные цены для студентов и школьников</p>
+                <a href="{{ url_for('shop.catalog') }}" class="banner-btn">Выбрать ноутбук</a>
+            </div>
+        </div>
+        <div class="banner-slide light-text" style="background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.1)), url({{ url_for('static', filename='images/carousel/banner3.jpg') }});">
+            <div class="banner-content">
+                <h2>Аксессуары для дома</h2>
+                <p>Умные устройства для современной жизни</p>
+                <a href="{{ url_for('shop.catalog') }}" class="banner-btn">Узнать больше</a>
+            </div>
+        </div>
+
+        <!-- Стрелки управления -->
+        <button class="carousel-arrow prev"><i class="fas fa-chevron-left"></i></button>
+        <button class="carousel-arrow next"><i class="fas fa-chevron-right"></i></button>
+
+        <!-- Индикаторы -->
+        <div class="carousel-controls">
+            <div class="carousel-indicator active"></div>
+            <div class="carousel-indicator"></div>
+            <div class="carousel-indicator"></div>
+        </div>
+    </div>
+
+    <!-- Популярные категории в виде сетки с иконками -->
+    <h2>Популярные категории</h2>
+    <div class="category-grid">
+        {% for category in categories %}
+        <a href="{{ url_for('shop.category', category_id=category.id) }}" class="category-card">
+            {% if category.image %}
+            <img src="{{ url_for('static', filename='images/categories/' + category.image) }}" alt="{{ category.name }}">
+            {% else %}
+            <i class="fas fa-box fa-3x" style="color: #FF6B00; margin-bottom: 12px; display: inline-block;"></i>
+            {% endif %}
+            <h4>{{ category.name }}</h4>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Популярные товары -->
+    <h2>Популярные товары</h2>
+    <div class="products">
+        {% for product in popular_products %}
+        <div class="product-card">
+            <div class="product-image">
+                {% if product.image %}
+                <img src="{{ url_for('static', filename='images/products/' + product.image) }}" alt="{{ product.name }}">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/no-image.png') }}" alt="Изображение отсутствует">
+                {% endif %}
+            </div>
+            <div class="product-info">
+                <div class="product-title">
+                    <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                </div>
+                <div class="product-price">{{ product.price }} ₽</div>
+                <a href="{{ url_for('cart.add', product_id=product.id) }}" class="add-to-cart">
+                    <i class="fas fa-shopping-cart"></i> В корзину
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Секция брендов -->
+    <div class="brands-section">
+        <h2>Популярные бренды</h2>
+        <div class="brands-grid">
+            <div class="brand-item">
+                <img src="{{ url_for('static', filename='images/brands/apple.png') }}" alt="Apple">
+            </div>
+            <div class="brand-item">
+                <img src="{{ url_for('static', filename='images/brands/samsung.png') }}" alt="Samsung">
+            </div>
+            <div class="brand-item">
+                <img src="{{ url_for('static', filename='images/brands/xiaomi.png') }}" alt="Xiaomi">
+            </div>
+            <div class="brand-item">
+                <img src="{{ url_for('static', filename='images/brands/huawei.png') }}" alt="Huawei">
+            </div>
+            <div class="brand-item">
+                <img src="{{ url_for('static', filename='images/brands/asus.png') }}" alt="Asus">
+            </div>
+            <div class="brand-item">
+                <img src="{{ url_for('static', filename='images/brands/sony.png') }}" alt="Sony">
+            </div>
+        </div>
+    </div>
+
+    <!-- Баннер со специальным предложением -->
+    <div class="promo-banner" style="margin: 40px 0; padding: 30px; background-color: #f5f5f5; border-radius: 12px; text-align: center;">
+        <h2 style="margin-bottom: 15px; color: #333;">Подпишитесь на нашу рассылку</h2>
+        <p style="margin-bottom: 20px; color: #666;">Получайте первыми информацию о новинках и специальных предложениях</p>
+        <div style="max-width: 500px; margin: 0 auto; display: flex;">
+            <input type="email" placeholder="Ваш email" style="flex-grow: 1; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px 0 0 8px; outline: none;">
+            <button style="padding: 12px 20px; background-color: #FF6B00; color: white; border: none; border-radius: 0 8px 8px 0; cursor: pointer; font-weight: 500;">Подписаться</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/carousel.js') }}"></script>
+{% endblock %}
