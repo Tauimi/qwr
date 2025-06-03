@@ -232,7 +232,7 @@
 
                 {# Ссылка на следующую страницу #}
                 <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                  <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.next_num, sort=sort_by, **request.view_args) if pagination.has_next else '#_'}">
+                  <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.next_num, sort=sort_by, **request.view_args) if pagination.has_next else '#'}}">
                     <span class="d-none d-md-inline">Вперед</span> &raquo;
                   </a>
                 </li>
@@ -301,4 +301,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %} 
+{% endblock %}

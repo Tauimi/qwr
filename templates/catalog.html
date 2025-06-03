@@ -60,7 +60,7 @@
             {# positive_reviews_count = product_data[3] - если понадобится #}
             <div class="product-card animate-fade-in">
                 <div class="product-image">
-                    <a href="javascript:void(0);" onclick="loadProductInModal({{ product.id }})">
+                    <a href="javascript:void(0);" onclick="loadProductInModal( product.id )">
                         <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}">
                     </a>
                     
@@ -77,7 +77,7 @@
                 </div>
                 <div class="product-info">
                     <div class="product-title">
-                        <a href="javascript:void(0);" onclick="loadProductInModal({{ product.id }})">{{ product.name }}</a>
+                        <a href="javascript:void(0);" onclick="loadProductInModal(product.id )">{{ product.name }}</a>
                     </div>
                     <div class="product-rating-mini">
                         <div class="stars">
@@ -114,7 +114,7 @@
       <ul class="pagination justify-content-center">
         {# Ссылка на предыдущую страницу #}
         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-          <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.prev_num, sort=sort_by, **request.view_args) if pagination.has_prev else '#_' }}" tabindex="-1" aria-disabled="{{ 'true' if not pagination.has_prev else 'false' }}">
+          <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.prev_num, sort=sort_by, **request.view_args) if pagination.has_prev else '#' }}" tabindex="-1" aria-disabled="{{ 'true' if not pagination.has_prev else 'false' }}">
             &laquo; <span class="d-none d-md-inline">Назад</span>
           </a>
         </li>
@@ -138,7 +138,7 @@
 
         {# Ссылка на следующую страницу #}
         <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-          <a class="page-link" href="{ url_for(request.endpoint, page=pagination.next_num, sort=sort_by, **request.view_args) if pagination.has_next else '#_'}">
+          <a class="page-link" href="{{ url_for(request.endpoint, page=pagination.next_num, sort=sort_by, **request.view_args) if pagination.has_next else '#' }}">
             <span class="d-none d-md-inline">Вперед</span> &raquo;
           </a>
         </li>
