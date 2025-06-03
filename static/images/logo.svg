@@ -1,0 +1,13 @@
+
+<svg width="150" height="50" viewBox="0 0 150 50" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .logo-text { font-family: Arial, sans-serif; font-weight: bold; }
+    .logo-icon { fill: #3498db; }
+    .logo-text-color { fill: #2c3e50; }
+    @media (prefers-color-scheme: dark) {
+      .logo-text-color { fill: #ecf0f1; }
+    }
+  </style>
+  <rect class="logo-icon" x="10" y="10" width="30" height="30" rx="5" />
+  <text x="50" y="32" class="logo-text logo-text-color" font-size="20">Магазин</text>
+</svg>

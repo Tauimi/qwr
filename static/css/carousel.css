@@ -1,0 +1,238 @@
+
+/* Основные стили карусели */
+.modern-carousel-container {
+    margin-bottom: 40px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.carousel-wrapper {
+    position: relative;
+    max-width: 100%;
+    height: 400px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.carousel-slides {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.carousel-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.carousel-slide.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide-content {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    padding: 0 5%;
+}
+
+.slide-text {
+    flex: 1;
+    padding-right: 30px;
+    color: #333;
+    z-index: 2;
+}
+
+.slide-text h2 {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 700;
+}
+
+.slide-text p {
+    font-size: 18px;
+    margin-bottom: 25px;
+    color: #666;
+}
+
+.slide-btn {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: 500;
+    box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
+    transition: all 0.3s ease;
+}
+
+.slide-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+}
+
+.slide-image {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slide-image img {
+    max-width: 100%;
+    max-height: 350px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    transition: transform 0.3s ease;
+}
+
+.carousel-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+}
+
+.carousel-arrow:hover {
+    background: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+.carousel-arrow.prev {
+    left: 20px;
+}
+
+.carousel-arrow.next {
+    right: 20px;
+}
+
+.carousel-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.indicator.active {
+    width: 30px;
+    border-radius: 5px;
+    background: #3498db;
+}
+
+/* Темная тема для карусели */
+body.dark-theme .modern-carousel-container {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+body.dark-theme .carousel-wrapper {
+    background: #2a2a3c;
+}
+
+body.dark-theme .slide-text h2 {
+    color: #f0f0f0;
+}
+
+body.dark-theme .slide-text p {
+    color: #ccc;
+}
+
+body.dark-theme .carousel-arrow {
+    background: rgba(60, 60, 80, 0.85);
+    color: #f0f0f0;
+}
+
+body.dark-theme .carousel-arrow:hover {
+    background: #3a3a4c;
+}
+
+/* Режим для слабовидящих */
+body.large-font .slide-text h2 {
+    font-size: 40px;
+}
+
+body.large-font .slide-text p {
+    font-size: 24px;
+}
+
+body.large-font .slide-btn {
+    font-size: 20px;
+    padding: 15px 30px;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .carousel-wrapper {
+        height: auto;
+        min-height: 500px;
+    }
+
+    .slide-content {
+        flex-direction: column-reverse;
+        padding: 20px;
+    }
+
+    .slide-text, .slide-image {
+        width: 100%;
+        padding: 0;
+        text-align: center;
+    }
+
+    .slide-text {
+        margin-top: 20px;
+    }
+
+    .slide-text h2 {
+        font-size: 24px;
+    }
+
+    .slide-text p {
+        font-size: 16px;
+    }
+
+    .slide-image img {
+        max-height: 200px;
+    }
+    
+    body.large-font .slide-text h2 {
+        font-size: 30px;
+    }
+
+    body.large-font .slide-text p {
+        font-size: 20px;
+    }
+}

@@ -1,0 +1,458 @@
+/* Основные стили сайта */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #2ecc71;
+    --dark-color: #2c3e50;
+    --light-color: #ecf0f1;
+    --danger-color: #e74c3c;
+    --success-color: #27ae60;
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для гарантии светлой темы по умолчанию */
+html.default-theme, body.default-theme {
+    background-color: #f9f9f9 !important;
+    color: #333 !important;
+    font-size: initial !important;
+}
+
+body.default-theme header, html.default-theme header {
+    background-color: white !important;
+    color: var(--dark-color) !important;
+}
+
+body.default-theme nav, html.default-theme nav {
+    background-color: var(--dark-color) !important;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Плавные переходы для темной темы */
+body, body *, header, nav, .product-card, .categories, .visitor-counter, 
+.cart-total, .contact-form, .product-details, .sitemap-list li,
+input, textarea, select, .form-control, .search-form input, .search-form button,
+.cart-table th, .cart-table td, footer, .footer-menu a {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    line-height: 1.6;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+a {
+    text-decoration: none;
+    color: var(--primary-color);
+}
+
+a:hover {
+    color: #1a75b3;
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* Основной контент */
+.main-content {
+    display: flex;
+    margin-bottom: 40px;
+}
+
+.sidebar {
+    width: 250px;
+    margin-right: 30px;
+}
+
+.content {
+    flex: 1;
+}
+
+/* Счетчик посещений */
+.visitor-counter {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    padding: 15px;
+    text-align: center;
+}
+
+.visitor-counter h3 {
+    margin-bottom: 10px;
+}
+
+.visitor-counter .count {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+/* Функции специальных возможностей */
+body.large-font, html.large-font {
+    font-size: 150%;
+    transform: scale(1); /* Точка отсчета для масштабирования */
+    zoom: 1.2; /* Альтернативный метод масштабирования для старых браузеров */
+}
+
+/* Сильное масштабирование для режима слабовидящих */
+@media screen {
+    html.large-font {
+        transform-origin: top center;
+        min-width: 1200px; /* Минимальная ширина для предотвращения переноса элементов */
+    }
+    
+    html.large-font body {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+}
+
+/* Глобальное увеличение всех элементов */
+body.large-font *, html.large-font * {
+    max-width: 100%;
+    line-height: 1.5 !important;
+}
+
+/* Увеличение изображений */
+body.large-font img, html.large-font img {
+    max-width: 100%;
+    transform: scale(1.15);
+    margin: 10px auto;
+}
+
+/* Увеличение интерактивных элементов */
+body.large-font button, 
+body.large-font .btn,
+body.large-font input,
+body.large-font select,
+body.large-font textarea,
+body.large-font .form-control,
+html.large-font button, 
+html.large-font .btn,
+html.large-font input,
+html.large-font select,
+html.large-font textarea,
+html.large-font .form-control {
+    transform: scale(1.1);
+    margin: 5px;
+    transform-origin: left center;
+}
+
+/* Увеличение отступов */
+body.large-font .container,
+html.large-font .container {
+    padding: 0 25px; /* Увеличенный отступ с 15px до 25px */
+}
+
+body.large-font .main-content,
+html.large-font .main-content {
+    margin-bottom: 60px; /* Увеличено с 40px */
+}
+
+body.large-font h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1.2em;
+}
+
+body.large-font h2 {
+    font-size: 2rem;
+    margin-bottom: 1em;
+}
+
+body.large-font h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.8em;
+}
+
+body.large-font p, 
+body.large-font li, 
+body.large-font a, 
+body.large-font label, 
+body.large-font input, 
+body.large-font button,
+body.large-font textarea {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 1.2em;
+}
+
+/* Увеличение кнопок и формы */
+body.large-font .form-control {
+    height: auto;
+    padding: 15px; /* Увеличено с 12px */
+    border-width: 2px;
+}
+
+body.large-font button, 
+body.large-font .submit-button,
+body.large-font .add-to-cart {
+    padding: 15px 30px; /* Увеличено с 12px 24px */
+    border-width: 2px;
+    margin: 10px 0;
+}
+
+/* Увеличение иконок */
+body.large-font .fas, 
+body.large-font .far, 
+body.large-font .fab, 
+body.large-font .fa {
+    font-size: 120%; /* Увеличено с 90% */
+}
+
+/* Увеличение отступов между элементами */
+body.large-font .product-card,
+body.large-font .categories,
+body.large-font .visitor-counter,
+body.large-font .cart-total,
+body.large-font .contact-form,
+body.large-font .sitemap-list li,
+html.large-font .product-card,
+html.large-font .categories,
+html.large-font .visitor-counter,
+html.large-font .cart-total,
+html.large-font .contact-form,
+html.large-font .sitemap-list li {
+    padding: 20px; /* Увеличено с базового значения */
+    margin-bottom: 20px;
+    border-radius: 8px; /* Увеличено для лучшей видимости границ */
+}
+
+/* Увеличение высоты строк в таблицах */
+body.large-font table,
+html.large-font table {
+    line-height: 2;
+}
+
+body.large-font td,
+body.large-font th,
+html.large-font td,
+html.large-font th {
+    padding: 15px 10px; /* Увеличено с базового значения */
+}
+
+body.high-contrast {
+    background-color: black;
+    color: white;
+}
+
+body.high-contrast header,
+body.high-contrast .product-card,
+body.high-contrast .categories,
+body.high-contrast .visitor-counter,
+body.high-contrast .cart-total,
+body.high-contrast .contact-form,
+body.high-contrast .sitemap-list li {
+    background-color: #222;
+    color: white;
+}
+
+body.high-contrast a {
+    color: yellow;
+    text-decoration: underline;
+}
+
+body.high-contrast button,
+body.high-contrast .submit-button,
+body.high-contrast .add-to-cart {
+    background-color: #ffff00;
+    color: #000000;
+    border: 2px solid #000000;
+    font-weight: bold;
+}
+
+body.high-contrast input,
+body.high-contrast textarea,
+body.high-contrast select {
+    background-color: black;
+    color: white;
+    border: 2px solid yellow;
+}
+
+body.high-contrast .main-menu a:hover {
+    background-color: #444;
+}
+
+body.high-contrast .product-title,
+body.high-contrast .product-price,
+body.high-contrast .product-detail-title,
+body.high-contrast .product-detail-price {
+    color: white;
+}
+
+/* Темная тема */
+body.dark-theme, html.dark-theme {
+    background-color: #222222;
+    color: #e6e6e6;
+}
+
+body.dark-theme header, html.dark-theme header {
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme nav, html.dark-theme nav {
+    background-color: #252525;
+}
+
+body.dark-theme .product-card,
+body.dark-theme .categories,
+body.dark-theme .visitor-counter,
+body.dark-theme .cart-total,
+body.dark-theme .contact-form,
+body.dark-theme .product-details,
+body.dark-theme .sitemap-list li {
+    background-color: #2d2d2d;
+    color: #e6e6e6;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-theme input,
+body.dark-theme textarea,
+body.dark-theme select,
+body.dark-theme .form-control {
+    background-color: #3a3a3a;
+    color: #e6e6e6;
+    border-color: #444;
+}
+
+body.dark-theme .search-form input {
+    background-color: #333;
+    color: #e6e6e6;
+    border-color: #444;
+}
+
+body.dark-theme .search-form button {
+    background-color: #3a3a3a;
+}
+
+body.dark-theme .add-to-cart,
+body.dark-theme .add-to-cart-large,
+body.dark-theme .submit-button,
+body.dark-theme .checkout-button {
+    background-color: #0078d7;
+}
+
+body.dark-theme .add-to-cart:hover,
+body.dark-theme .add-to-cart-large:hover,
+body.dark-theme .submit-button:hover,
+body.dark-theme .checkout-button:hover {
+    background-color: #0261a9;
+}
+
+body.dark-theme .cart-table th {
+    background-color: #333;
+}
+
+body.dark-theme .cart-table td {
+    border-color: #3a3a3a;
+}
+
+body.dark-theme footer {
+    background-color: #252525;
+}
+
+body.dark-theme .footer-menu a {
+    color: #ccc;
+}
+
+body.dark-theme .footer-menu a:hover {
+    color: #e6e6e6;
+}
+
+/* Flash сообщения */
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    position: relative;
+    transition: opacity 0.3s ease;
+}
+
+.alert-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.alert-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.alert-warning {
+    background-color: #f39c12;
+    color: white;
+}
+
+.alert-info {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.alert-close {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0.7;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+body.dark-theme .alert-success {
+    background-color: #1e6e3a;
+}
+
+body.dark-theme .alert-danger {
+    background-color: #962c22;
+}
+
+body.dark-theme .alert-warning {
+    background-color: #b0740d;
+}
+
+body.dark-theme .alert-info {
+    background-color: #0261a9;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Размер иконок */
+.fas, .far, .fab, .fa {
+    font-size: 90%; /* Уменьшаем все иконки на 10% от исходного */
+}
+
+/* Иконки в шапке */
+.header-content .fas, 
+.header-content .far, 
+.header-content .fab,
+.header-content .fa {
+    font-size: 85%;
+} 

@@ -1,0 +1,106 @@
+/* Адаптивность */
+@media (max-width: 992px) {
+    .header-content {
+        flex-direction: column;
+    }
+    
+    .logo {
+        margin-bottom: 15px;
+    }
+    
+    .search-form {
+        margin: 15px 0;
+        max-width: 100%;
+    }
+    
+    .main-content {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 30px;
+    }
+    
+    .product-details {
+        flex-direction: column;
+    }
+    
+    .product-gallery,
+    .product-detail-info {
+        width: 100%;
+    }
+    
+    .footer-content {
+        flex-wrap: wrap;
+    }
+    
+    .footer-column {
+        width: 50%;
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .products {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    
+    .banner h2 {
+        font-size: 28px;
+    }
+    
+    .banner p {
+        font-size: 16px;
+    }
+    
+    .main-menu {
+        flex-wrap: wrap;
+    }
+    
+    .main-menu li {
+        margin-bottom: 10px;
+    }
+    
+    .footer-column {
+        width: 100%;
+    }
+    
+    .error-code {
+        font-size: 80px;
+    }
+    
+    .error-container h1 {
+        font-size: 28px;
+    }
+    
+    .error-actions .btn {
+        display: block;
+        margin: 10px auto;
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .product-card {
+        margin-bottom: 20px;
+    }
+    
+    .banner {
+        height: 250px;
+    }
+    
+    .cart-table th:nth-child(3),
+    .cart-table td:nth-child(3) {
+        display: none;
+    }
+    
+    .product-detail-title {
+        font-size: 24px;
+    }
+    
+    .product-detail-price {
+        font-size: 20px;
+    }
+} 

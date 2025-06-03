@@ -1,0 +1,98 @@
+/* Категории */
+.categories {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 30px;
+}
+
+.categories h3 {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.category-list {
+    list-style: none;
+}
+
+.category-list li {
+    border-bottom: 1px solid #eee;
+}
+
+.category-list li:last-child {
+    border-bottom: none;
+}
+
+.category-list a {
+    display: block;
+    padding: 12px 15px;
+    transition: background-color 0.3s;
+}
+
+.category-list a:hover {
+    background-color: #f9f9f9;
+}
+
+/* Фильтры каталога */
+.filter-widget {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 30px;
+    padding: 15px;
+}
+
+.filter-group {
+    margin-bottom: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.price-range {
+    display: flex;
+    align-items: center;
+}
+
+.price-range input {
+    width: 80px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.price-range span {
+    margin: 0 10px;
+}
+
+.filter-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+}
+
+.filter-apply {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Стили для "нет товаров" */
+.no-products {
+    background-color: white;
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    padding: 30px;
+    text-align: center;
+    color: #666;
+} 

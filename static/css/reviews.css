@@ -1,0 +1,429 @@
+/* Стили для отзывов */
+.product-reviews {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.reviews-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.reviews-summary {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.average-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stars {
+    display: flex;
+    color: #ffc107;
+}
+
+.rating-value {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.reviews-count {
+    color: #666;
+}
+
+/* Стили для списка отзывов */
+.reviews-list, .recent-reviews {
+    margin-bottom: 30px;
+}
+
+.review-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.review-user {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.review-date {
+    color: #777;
+    font-size: 0.9em;
+}
+
+.review-rating {
+    color: #ffc107;
+}
+
+.review-title {
+    margin: 10px 0;
+    color: #333;
+}
+
+.review-content {
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.review-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.review-votes {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.vote-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.vote-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.like-btn {
+    color: #4caf50;
+}
+
+.dislike-btn {
+    color: #f44336;
+}
+
+.admin-response {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f0f7ff;
+    border-left: 3px solid #2196f3;
+    border-radius: 4px;
+}
+
+.admin-response-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.admin-label {
+    font-weight: bold;
+    color: #2196f3;
+}
+
+.admin-response-date {
+    font-size: 0.9em;
+    color: #666;
+}
+
+.admin-response-content {
+    line-height: 1.5;
+}
+
+.no-reviews {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+/* Стили для формы добавления отзыва */
+.add-review-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+}
+
+.review-form {
+    margin-top: 15px;
+}
+
+.rating-input {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Стили для звездного рейтинга */
+.star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 5px;
+}
+
+.star-rating input {
+    display: none;
+}
+
+.star-rating label {
+    cursor: pointer;
+    color: #ddd;
+    font-size: 1.5em;
+}
+
+.star-rating label .fas {
+    display: none;
+}
+
+.star-rating label .far {
+    display: inline-block;
+}
+
+.star-rating input:checked ~ label .fas,
+.star-rating label:hover .fas,
+.star-rating label:hover ~ label .fas,
+.star-rating input:checked + label:hover .fas,
+.star-rating input:checked ~ label:hover .fas,
+.star-rating input:checked ~ label:hover ~ label .fas {
+    display: inline-block;
+    color: #ffc107;
+}
+
+.star-rating input:checked ~ label .far,
+.star-rating label:hover .far,
+.star-rating label:hover ~ label .far,
+.star-rating input:checked + label:hover .far,
+.star-rating input:checked ~ label:hover .far,
+.star-rating input:checked ~ label:hover ~ label .far {
+    display: none;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1em;
+}
+
+textarea.form-control {
+    resize: vertical;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.submit-button:hover {
+    background-color: #45a049;
+}
+
+/* Стили для страницы всех отзывов */
+.product-reviews-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.product-info {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.overall-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.rating-distribution {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.rating-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rating-label {
+    width: 60px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.progress {
+    flex-grow: 1;
+    height: 15px;
+    background-color: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #ffc107;
+}
+
+.rating-count {
+    width: 30px;
+    text-align: right;
+}
+
+.product-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.review-sorting {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.sort-option {
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #666;
+    text-decoration: none;
+}
+
+.sort-option:hover,
+.sort-option.active {
+    background-color: #e0e0e0;
+    color: #333;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Стили для быстрой оценки товара */
+.quick-rating-box {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+.quick-rating-title {
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.quick-rating-stars {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.star-rating-row {
+    display: flex;
+    gap: 5px;
+}
+
+.quick-star {
+    cursor: pointer;
+    font-size: 1.8em;
+    color: #ddd;
+    transition: color 0.2s;
+}
+
+.quick-star:hover,
+.quick-star.active {
+    color: #ffc107;
+}
+
+.quick-rating-message {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
+    text-align: center;
+} 

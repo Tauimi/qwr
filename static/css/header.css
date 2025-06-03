@@ -1,0 +1,367 @@
+/* Современные стили для шапки сайта */
+header {
+    background-color: var(--header-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: background-color 0.3s;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    flex-wrap: wrap;
+    position: relative;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    margin-right: 20px;
+}
+
+.logo img, .logo picture {
+    height: 40px;
+    width: auto;
+    max-width: 150px;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--primary-color) !important; /* Основной цвет темы */
+    transition: color 0.3s;
+}
+
+body.dark-theme .logo-text {
+    color: #ecf0f1 !important; /* Принудительно установленный светлый цвет */
+}
+
+.header-clock {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 15px;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s;
+}
+
+body.dark-theme .header-clock {
+    color: #ecf0f1;
+}
+
+.search-form {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+    margin: 0 20px;
+}
+
+.search-form input {
+    width: 100%;
+    padding: 12px 18px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px 0 0 8px;
+    outline: none;
+    background-color: #f5f5f5;
+    color: #333;
+    font-size: 15px;
+    transition: all 0.2s ease;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.search-form input:focus {
+    border-color: #FF6B00;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(255,107,0,0.1);
+}
+
+.search-form button {
+    padding: 12px 20px;
+    background-color: var(--primary-color); /* Использование основного цвета темы */
+    color: white;
+    border: none;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.search-form button:hover {
+    background-color: #3451e0; /* Более темный оттенок основного цвета */
+    transform: translateY(-1px);
+}
+
+/* Современные иконки в шапке */
+.header-icons {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.header-icon {
+    text-decoration: none;
+    font-size: 18px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    color: #444 !important;
+    background-color: transparent;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+.header-icon:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: var(--primary-color) !important;
+    transform: translateY(-2px);
+}
+
+/* В темной теме принудительно устанавливаем светлый цвет */
+body.dark-theme .header-icon {
+    color: #ecf0f1 !important; /* Светлый цвет в темной теме */
+}
+
+.cart-count,
+.favorites-count,
+.compare-count {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 10px;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.compare-count {
+    background-color: #2196F3;
+}
+
+/* Современная навигация */
+nav {
+    background-color: #fff;
+    border-bottom: 1px solid #eaeaea;
+    padding: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.main-menu {
+    list-style: none;
+    display: flex;
+    gap: 0;
+    padding: 0;
+    margin: 0;
+    flex-wrap: wrap;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.main-menu a {
+    color: #333 !important;
+    text-decoration: none;
+    padding: 15px 20px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+    font-weight: 500;
+    font-size: 15px;
+    border-bottom: 3px solid transparent;
+}
+
+/* Современные стили для навигации */
+body:not(.dark-theme) .main-menu a {
+    color: #333 !important;
+}
+
+.main-menu a:hover {
+    color: var(--accent-color) !important;
+    border-bottom: 3px solid var(--accent-color);
+    background-color: transparent;
+}
+
+.main-menu a.active {
+    color: var(--primary-color) !important;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.main-menu i {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Кнопки переключения темы */
+.theme-button {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 20px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+/* Кнопки в светлой теме имеют темный текст, с !important для переопределения других стилей */
+body:not(.dark-theme) .theme-button {
+    color: #2c3e50 !important;
+    border-color: var(--border-color);
+}
+
+/* Кнопки в темной теме имеют светлый текст, с !important для переопределения других стилей */
+body.dark-theme .theme-button {
+    color: #ecf0f1 !important;
+    border-color: #444;
+}
+
+.theme-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.theme-button.active {
+    background-color: var(--primary-color);
+    color: white !important; /* Используем !important для переопределения цвета в обеих темах */
+    border-color: var(--primary-color);
+}
+
+.theme-button i {
+    margin-right: 5px;
+}
+
+.button-text {
+    display: inline-block;
+}
+
+/* Адаптивность */
+@media (max-width: 992px) {
+    .header-content {
+        flex-wrap: wrap;
+    }
+
+    .logo {
+        margin-bottom: 10px;
+    }
+
+    .search-form {
+        order: 3;
+        margin: 10px 0;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .header-icons {
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-icons {
+        margin-top: 15px;
+        align-self: flex-end;
+    }
+
+    .main-menu {
+        justify-content: center;
+    }
+
+    .button-text {
+        display: none;
+    }
+
+    .theme-button {
+        padding: 8px;
+    }
+
+    .theme-button i {
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .logo-text {
+        font-size: 20px;
+    }
+
+    .main-menu {
+        gap: 5px;
+    }
+
+    .main-menu a {
+        padding: 6px 10px;
+        font-size: 14px;
+    }
+}
+
+/* Темная тема для шапки */
+body.dark-theme .search-form input {
+    background-color: #353549;
+    color: #e0e0e0;
+    border-color: #444;
+}
+
+body.dark-theme .header-icon:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Режим для слабовидящих */
+body.large-font .logo-text {
+    font-size: 28px;
+}
+
+body.large-font .search-form input,
+body.large-font .search-form button {
+    padding: 12px 18px;
+    font-size: 16px;
+}
+
+body.large-font .header-icon {
+    font-size: 24px;
+    width: 50px;
+    height: 50px;
+}
+
+body.large-font .cart-count {
+    font-size: 14px;
+    width: 24px;
+    height: 24px;
+}
+
+body.large-font .main-menu a {
+    font-size: 18px;
+    padding: 10px 18px;
+}
+
+body.large-font .theme-button {
+    padding: 10px 15px;
+    font-size: 16px;
+}
