@@ -69,6 +69,9 @@ def create_app(config_name=None):
     # Гарантируем создание всех таблиц перед первым запросом
     with app.app_context():
         db.create_all()
+        
+        # Создаем первого администратора, если нет пользователей
+        create_admin_if_not_exists()
 
     # Настройка логирования
     if not app.debug:
@@ -200,3 +203,35 @@ def create_app(config_name=None):
 
     # Возвращаем созданное приложение
     return app
+
+# Функция для создания администратора при первом запуске
+def create_admin_if_not_exists():
+    """Создает пользователя-администратора, если в БД нет пользователей"""
+    from .models import User
+    
+    # Проверяем есть ли пользователи в базе данных
+    user_count = User.query.count()
+    
+    if user_count == 0:
+        # Определяем данные администратора
+        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_email = os.getenv('ADMIN_EMAIL', 'admin@example.com')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'Admin123!')
+        
+        # Создаем пользователя-администратора
+        admin_user = User(
+            username=admin_username,
+            email=admin_email,
+            is_admin=True,
+            is_active=True
+        )
+        
+        # Устанавливаем пароль
+        admin_user.set_password(admin_password)
+        
+        # Сохраняем в базу данных
+        db.session.add(admin_user)
+        db.session.commit()
+        
+        # Логируем создание администратора
+        current_app.logger.info(f'Создан администратор: {admin_username}')
