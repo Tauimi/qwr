@@ -1,12 +1,56 @@
-/* Основные стили сайта */
+/* Добавляем CSS-переменные для настройки цветовой схемы в стиле DNS */
 :root {
-    --primary-color: #3498db;
+    /* Основные цвета сайта */
+    --primary-color: #ff6900;     /* Основной оранжевый (как у DNS) */
+    --accent-color: #2196F3;      /* Акцентный синий */
+    --text-color: #333333;        /* Основной цвет текста */
+    --text-muted-color: #777777;  /* Приглушенный цвет текста */
+    
+    /* Фоновые цвета */
+    --header-bg: #ffffff;         /* Фон шапки */
+    --body-bg: #f5f5f5;           /* Фон страницы */
+    --card-bg: #ffffff;           /* Фон карточки товара */
+    --card-secondary-bg: #f9f9f9; /* Вторичный фон карточки */
+    
+    /* Модальное окно */
+    --modal-bg: #ffffff;          /* Фон модального окна */
+    --modal-text-color: #333333;  /* Цвет текста в модальном окне */
+    --modal-border: #e0e0e0;      /* Цвет границы модального окна */
+    
+    /* Границы */
+    --border-color: #e0e0e0;      /* Цвет границ */
+    
+    /* Остальные элементы */
+    --star-empty-color: #e4e5e9;  /* Цвет незаполненной звезды */
+    
     --secondary-color: #2ecc71;
     --dark-color: #2c3e50;
     --light-color: #ecf0f1;
     --danger-color: #e74c3c;
     --success-color: #27ae60;
     --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Стили для темной темы */
+body.dark-theme {
+    --primary-color: #ff6900;     /* Оставляем основной цвет */
+    --accent-color: #42a5f5;      /* Светлее для темной темы */
+    --text-color: #e0e0e0;        /* Светлый текст */
+    --text-muted-color: #aaaaaa;  /* Приглушенный светлый текст */
+    
+    --header-bg: #1a1a2e;         /* Темный фон шапки */
+    --body-bg: #0f3460;           /* Темный фон страницы */
+    --card-bg: #16213e;           /* Темный фон карточки */
+    --card-secondary-bg: #1a1a2e; /* Вторичный темный фон */
+    
+    /* Модальное окно в темной теме */
+    --modal-bg: #16213e;          /* Темный фон модального окна */
+    --modal-text-color: #e0e0e0;  /* Светлый текст в модальном окне */
+    --modal-border: #2c3e50;      /* Темная граница модального окна */
+    
+    --border-color: #2c3e50;      /* Темные границы */
+    
+    --star-empty-color: #2c3e50;  /* Темные незаполненные звезды */
 }
 
 * {
@@ -34,47 +78,143 @@ body {
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.6); /* Более темный фон */
+    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.modal.active {
+    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-content {
     background-color: var(--modal-bg);
-    margin: 5% auto; /* Уменьшил верхний отступ, чтобы окно было выше */
-    padding: 30px; /* Увеличил внутренние отступы */
-    border-radius: 12px; /* Более скругленные углы */
+    margin: 3% auto; /* Расположение относительно верха */
+    padding: 20px 25px; /* Внутренние отступы */
+    border-radius: 6px; /* Скругление углов как у DNS */
     width: 90%; /* Ширина относительно родителя */
-    max-width: 850px; /* Увеличиваем максимальную ширину модального окна */
+    max-width: 900px; /* Максимальная ширина модального окна */
     position: relative;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); /* Более мягкая и выраженная тень */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15); /* Тень */
     color: var(--modal-text-color);
+    border: 1px solid var(--modal-border);
+    transform: translateY(-20px);
+    transition: transform 0.3s;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
 }
 
 .close-button {
-    /* color: #aaa; */ /* Цвет будет наследоваться или задан более специфично */
-    /* float: right; */ /* Убираем float для лучшего контроля */
-    /* font-size: 28px; */ /* Размер иконки будет управлять размером */
-    /* font-weight: bold; */
     position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 1.5rem; /* Размер иконки */
-    color: #888; /* Цвет иконки по умолчанию */
+    top: 12px;
+    right: 15px;
+    font-size: 1.2rem; /* Размер иконки */
+    color: var(--text-muted-color); /* Цвет иконки */
     background: none;
     border: none;
-    padding: 0;
+    padding: 5px;
     cursor: pointer;
-    transition: color 0.2s ease-in-out;
+    transition: color 0.2s;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
 }
 
 .close-button:hover,
 .close-button:focus {
-    color: #333; /* Более темный цвет при наведении */
-    text-decoration: none;
+    color: var(--primary-color); /* Оранжевый цвет при наведении как на DNS */
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 #productModalBody {
-    max-height: 70vh; /* Limit height and enable scroll if content is too long */
-    overflow-y: auto;
+    max-height: 75vh; /* Ограничение по высоте */
+    overflow-y: auto; /* Прокрутка при необходимости */
+    padding-right: 5px; /* Отступ для полосы прокрутки */
+}
+
+/* Стилизация полосы прокрутки */
+#productModalBody::-webkit-scrollbar {
+    width: 6px;
+}
+
+#productModalBody::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#productModalBody::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+#productModalBody::-webkit-scrollbar-thumb:hover {
+    background: #aaa;
+}
+
+/* Стили для карточки товара внутри модального окна */
+.product-details-modal-view {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.product-details {
+    display: flex;
+    gap: 30px;
+}
+
+.product-gallery {
+    flex: 0 0 40%;
+}
+
+.product-detail-info {
+    flex: 1;
+}
+
+.product-detail-title {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.product-detail-price {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+.modal-overall-rating-summary {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-overall-rating-summary .stars .fas.fa-star {
+    color: #ffc107;
+}
+
+/* Адаптивные стили для модального окна */
+@media (max-width: 768px) {
+    .product-details {
+        flex-direction: column;
+    }
+    
+    .product-gallery {
+        flex: 0 0 100%;
+        margin-bottom: 20px;
+    }
 }
 
 a {
