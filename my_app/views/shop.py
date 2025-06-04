@@ -208,27 +208,23 @@ def product(product_id):
 
 @shop_bp.route('/product_modal/<int:product_id>')
 def product_modal(product_id):
-    """Возвращает HTML для модального окна товара"""
-    product = Product.query.get_or_404(product_id)
-    # The logic for visited products is not needed for the modal view
-    # as it's handled by the full product page or can be moved to client-side if desired.
+    # Закомментируем текущую логику
+    # product = Product.query.get_or_404(product_id)
+    # related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
+    # reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
+    # total_reviews = len(reviews)
+    # avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
+    # if avg_rating is None: avg_rating = 0
 
-    # Fetch related products for the modal as well
-    related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
+    # return render_template('product_modal_content.html', 
+    #                        product=product, 
+    #                        related_products=related_products,
+    #                        reviews=reviews,
+    #                        total_reviews=total_reviews,
+    #                        avg_rating=avg_rating)
 
-    # Fetch reviews and ratings for the modal
-    reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
-    total_reviews = len(reviews)
-    avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
-    if avg_rating is None: avg_rating = 0
-
-    # Render a partial template for the modal content
-    return render_template('product_modal_content.html', 
-                           product=product, 
-                           related_products=related_products,
-                           reviews=reviews,
-                           total_reviews=total_reviews,
-                           avg_rating=avg_rating)
+    # Временно возвращаем простую строку для теста
+    return "<h1>Тестовый контент модального окна</h1><p>Если вы это видите, проблема в шаблоне product_modal_content.html.</p>"
 
 @shop_bp.route('/search')
 def search():
