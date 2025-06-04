@@ -57,20 +57,20 @@
                 {% if review.pros %}
                 <div class="review-pros">
                     <h5><i class="fas fa-plus-circle text-success"></i> Достоинства</h5>
-                    <p>{{ review.pros }}</p>
+                    <p>{{ review.pros|escape|nl2br }}</p>
                 </div>
                 {% endif %}
                 
                 {% if review.cons %}
                 <div class="review-cons">
                     <h5><i class="fas fa-minus-circle text-danger"></i> Недостатки</h5>
-                    <p>{{ review.cons }}</p>
+                    <p>{{ review.cons|escape|nl2br }}</p>
                 </div>
                 {% endif %}
                 
                 <div class="review-content">
                     <h5><i class="fas fa-comment"></i> Комментарий</h5>
-                    {{ review.content }}
+                    {{ review.content|escape|nl2br }}
                 </div>
                 
                 {% if review.has_photos %}
@@ -134,7 +134,7 @@
                             <span class="admin-response-date">{{ review.admin_response_formatted_date }}</span>
                         </div>
                         <div class="admin-response-content">
-                            {{ review.admin_response }}
+                            {{ review.admin_response|escape|nl2br }}
                         </div>
                     </div>
                 {% endif %}

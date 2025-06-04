@@ -231,7 +231,7 @@
                         {% if review.title %}
                             <h4 class="review-title-text-modal">{{ review.title|escape }}</h4>
                         {% endif %}
-                        <div class="review-text-modal">{{ review.content|escape }}</div>
+                        <div class="review-text-modal">{{ review.content|escape|nl2br }}</div>
                     </div>
                     {% endfor %}
                 </div>

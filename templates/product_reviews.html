@@ -120,7 +120,7 @@
                                     <span class="admin-label">Ответ администратора</span>
                                     <span class="admin-response-date">${data.date}</span>
                                 </div>
-                                <div class="admin-response-content">${data.response}</div>
+                                <div class="admin-response-content">${data.response.replace(/\n/g, '<br>')}</div>
                             `;
                             
                             const reviewItem = document.querySelector(`#review-${reviewId}`);
