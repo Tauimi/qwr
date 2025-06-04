@@ -129,22 +129,26 @@
                     const modalBody = document.getElementById('productModalBody');
                     if (modalBody) {
                         modalBody.innerHTML = html;
+                        console.log('[Layout] modalBody.innerHTML has been set.');
                     } else {
-                        console.error('Элемент productModalBody не найден!');
+                        console.error('[Layout] Элемент productModalBody не найден!');
                     }
                     
-                    window.openModal(); // Теперь вызывается глобальная openModal
+                    window.openModal();
+                    console.log('[Layout] window.openModal() called.');
+                    console.log('[Layout] About to set timeout for initializeModalScripts. ProductId:', productId);
 
                     // Попытка инициализировать скрипты для содержимого модального окна, если это необходимо
                     // Даем браузеру небольшой таймаут для обработки скриптов вставленных через innerHTML
                     setTimeout(() => {
+                        console.log('[Layout] Timeout callback executed. Checking for initializeModalScripts. ProductId:', productId);
                         if (typeof initializeModalScripts === 'function') {
-                            console.log('[Layout] Calling initializeModalScripts for productId:', productId);
+                            console.log('[Layout] initializeModalScripts IS a function. Calling it. ProductId:', productId);
                             initializeModalScripts(productId);
                         } else {
-                            console.error('[Layout] initializeModalScripts is NOT a function after timeout! Check product_modal_content.html script definition.');
+                            console.error('[Layout] initializeModalScripts is NOT a function after 100ms! ProductId:', productId);
                         }
-                    }, 0); // setTimeout с 0 мс часто достаточно, можно увеличить до 50-100мс при необходимости
+                    }, 100); // Увеличена задержка
                 } catch (error) {
                     console.error('Не удалось загрузить информацию о товаре:', error);
                     const modalBody = document.getElementById('productModalBody');
