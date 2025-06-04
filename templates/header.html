@@ -13,12 +13,6 @@
                 </a>
             </div>
 
-            <!-- Поиск -->
-            <form action="{{ url_for('shop.search') }}" method="get" class="search-form">
-                <input type="text" name="query" placeholder="Поиск товаров...">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </form>
-
             <!-- Пользовательские функции -->
             <div class="header-icons">
                 <div class="theme-buttons">
@@ -89,6 +83,16 @@
                     </a>
                 {% endif %}
             </div>
+        </div>
+    </div>
+
+    <!-- Поиск между шапкой и навигацией -->
+    <div class="search-container">
+        <div class="container">
+            <form action="{{ url_for('shop.search') }}" method="get" class="search-form">
+                <input type="text" name="query" placeholder="Поиск товаров...">
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
         </div>
     </div>
 
