@@ -124,31 +124,54 @@
                     if (!response.ok) {
                         throw new Error(`HTTP ошибка! статус: ${response.status}`);
                     }
-                    const html = await response.text();
-                    console.log("Полученный HTML для модального окна:", html);
+                    let html = await response.text(); // Используем let, так как будем модифицировать html
+                    console.log("Полученный HTML для модального окна:", html.substring(0, 500)); // Логируем только начало
+
                     const modalBody = document.getElementById('productModalBody');
+                    
+                    // Извлекаем и выполняем скрипт отдельно
+                    const scriptRegex = /<script>([\s\S]*?)<\/script>/i; // Регулярное выражение для поиска скрипта
+                    const scriptMatch = html.match(scriptRegex);
+                    let scriptContent = null;
+
+                    if (scriptMatch && scriptMatch[1]) {
+                        scriptContent = scriptMatch[1];
+                        console.log('[Layout] Script content extracted from modal HTML.');
+                        // Удаляем тег скрипта из HTML перед вставкой в modalBody, чтобы избежать его автоматического выполнения (хотя оно и так не работает)
+                        html = html.replace(scriptRegex, ''); 
+                    }
+
                     if (modalBody) {
-                        modalBody.innerHTML = html;
-                        console.log('[Layout] modalBody.innerHTML has been set.');
+                        modalBody.innerHTML = html; // Вставляем HTML без скрипта
+                        console.log('[Layout] modalBody.innerHTML has been set (without script tag).');
                     } else {
                         console.error('[Layout] Элемент productModalBody не найден!');
                     }
+
+                    if (scriptContent) {
+                        const newScript = document.createElement('script');
+                        newScript.textContent = scriptContent;
+                        document.body.appendChild(newScript);
+                        console.log('[Layout] Dynamically created script appended to body.');
+                        // Важно: удаляем скрипт после выполнения, чтобы не накапливались при многократном открытии модалки
+                        // Однако, если initializeModalScripts определяется внутри, то удалять сразу нельзя.
+                        // Будем полагаться на то, что он определяет глобальную функцию и сам по себе не делает ничего "многоразового".
+                        // newScript.remove(); // Пока закомментируем, чтобы убедиться, что функция успевает определиться.
+                    }
                     
-                    window.openModal();
+                    window.openModal(); 
                     console.log('[Layout] window.openModal() called.');
                     console.log('[Layout] About to set timeout for initializeModalScripts. ProductId:', productId);
 
-                    // Попытка инициализировать скрипты для содержимого модального окна, если это необходимо
-                    // Даем браузеру небольшой таймаут для обработки скриптов вставленных через innerHTML
                     setTimeout(() => {
                         console.log('[Layout] Timeout callback executed. Checking for initializeModalScripts. ProductId:', productId);
-                        if (typeof initializeModalScripts === 'function') {
+                        if (typeof window.initializeModalScripts === 'function') { // Проверяем window.initializeModalScripts
                             console.log('[Layout] initializeModalScripts IS a function. Calling it. ProductId:', productId);
-                            initializeModalScripts(productId);
+                            window.initializeModalScripts(productId); // Вызываем через window
                         } else {
                             console.error('[Layout] initializeModalScripts is NOT a function after 100ms! ProductId:', productId);
                         }
-                    }, 100); // Увеличена задержка
+                    }, 100); 
                 } catch (error) {
                     console.error('Не удалось загрузить информацию о товаре:', error);
                     const modalBody = document.getElementById('productModalBody');
