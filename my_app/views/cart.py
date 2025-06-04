@@ -59,8 +59,15 @@ def add_to_cart(product_id):
     
     # Проверяем наличие товара на складе
     if product.stock < quantity:
-        flash('Недостаточно товара на складе', 'danger')
-        return redirect(url_for('shop.product', product_id=product.id))
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'status': 'error',
+                'message': 'Недостаточно товара на складе',
+                'product_id': product.id
+            }), 400 # Возвращаем статус 400 Bad Request
+        else:
+            flash('Недостаточно товара на складе', 'danger')
+            return redirect(url_for('shop.product', product_id=product.id))
     
     # Инициализируем корзину, если её нет
     if 'cart' not in session:
@@ -92,7 +99,8 @@ def add_to_cart(product_id):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
             'status': 'success',
-            'cart_count': sum(item['quantity'] for item in cart)
+            'message': 'Товар добавлен в корзину',
+            'cart_total_items': sum(item['quantity'] for item in cart)
         })
     
     # Иначе перенаправляем на страницу корзины

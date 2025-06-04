@@ -38,9 +38,7 @@ class Product(db.Model):
 
     # Связи
     specifications = db.relationship('Specification', backref='product', lazy=True, cascade='all, delete-orphan')
-
-    def __repr__(self):
-        return f'<Product {self.name}>'
+    # 'ratings' уже должно быть доступно через backref из модели Rating
 
     @property
     def discount_percent(self):
@@ -48,3 +46,28 @@ class Product(db.Model):
         if self.old_price and self.old_price > self.price:
             return int(100 - (self.price / self.old_price * 100))
         return 0 
+
+    @property
+    def total_ratings_count(self):
+        """Возвращает общее количество оценок для продукта."""
+        # self.ratings - это backref из модели Rating
+        # Необходимо импортировать Rating или использовать select для подсчета, если Ratings много
+        # Для простоты пока будем полагаться на то, что self.ratings доступно и не слишком велико
+        # Однако, правильнее было бы сделать запрос к БД, если Ratings может быть много.
+        # from .rating import Rating # Потенциальный циклический импорт, если Product импортируется в Rating
+        # return Rating.query.with_entities(db.func.count(Rating.id)).filter_by(product_id=self.id).scalar() or 0
+        return len(self.ratings) 
+
+    @property
+    def avg_rating(self):
+        """Вычисляет средний рейтинг продукта."""
+        if not self.ratings:
+            return 0.0 # Возвращаем float для единообразия
+        # Аналогично total_ratings_count, для больших наборов данных лучше делать агрегацию в БД
+        # from .rating import Rating
+        # avg_r = Rating.query.with_entities(db.func.avg(Rating.rating)).filter_by(product_id=self.id).scalar()
+        # return float(avg_r) if avg_r is not None else 0.0
+        return float(sum(r.rating for r in self.ratings)) / len(self.ratings)
+
+    def __repr__(self):
+        return f'<Product {self.name}>' 
