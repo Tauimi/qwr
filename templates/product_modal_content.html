@@ -347,8 +347,8 @@
             const submitButton = this.querySelector('button[type="submit"]');
             if(submitButton) submitButton.disabled = true;
 
-            const fetchUrl = `{{ url_for('reviews.add_review', product_id=product.id) }}`;
-            console.log('[Modal Review Form] Submitting review to URL:', fetchUrl, 'with method: POST', 'Product ID from template: {{ product.id }}');
+            const fetchUrl = '/reviews/add-modal';  // Используем новый эндпоинт для модального окна
+            console.log('[Modal Review Form] Submitting review to URL:', fetchUrl, 'with method: POST', 'Product ID from form:', formData.get('product_id'));
 
             fetch(fetchUrl, {
                 method: 'POST',

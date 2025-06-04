@@ -101,7 +101,17 @@
 
             // Делаем функции управления модальным окном глобально доступными
             window.openModal = function() {
-                if(modal) modal.style.display = 'block';
+                if(modal) {
+                    modal.style.display = 'block';
+                    // Убедимся, что modal получает правильное отображение, даже если другой CSS это переопределяет
+                    setTimeout(() => {
+                        if (modal.style.display !== 'block' || window.getComputedStyle(modal).backgroundColor === 'rgba(0, 0, 0, 0)') {
+                            console.log('[Layout] Fixing modal display style');
+                            modal.style.display = 'block';
+                            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+                        }
+                    }, 10);
+                }
             }
 
             window.closeModal = function() {
