@@ -89,48 +89,59 @@
         // Modal JavaScript
         document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('productModal');
+            if (!modal) { 
+                console.error('Элемент модального окна продукта не найден!');
+                return;
+            }
             const closeButton = modal.querySelector('.close-button');
-
-            function openModal() {
-                modal.style.display = 'block';
+            if (!closeButton) { 
+                 console.warn('Кнопка закрытия модального окна не найдена!');
             }
 
-            function closeModal() {
-                modal.style.display = 'none';
-                document.getElementById('productModalBody').innerHTML = ''; // Clear content
+            // Делаем функции управления модальным окном глобально доступными
+            window.openModal = function() {
+                if(modal) modal.style.display = 'block';
             }
 
-            closeButton.addEventListener('click', closeModal);
+            window.closeModal = function() {
+                if(modal) modal.style.display = 'none';
+                const modalBody = document.getElementById('productModalBody');
+                if(modalBody) modalBody.innerHTML = ''; // Очищаем содержимое
+            }
+
+            if(closeButton) closeButton.addEventListener('click', window.closeModal);
 
             window.addEventListener('click', function (event) {
                 if (event.target == modal) {
-                    closeModal();
+                    window.closeModal();
                 }
             });
 
-            // Function to load product details into modal
+            // Функция для загрузки информации о товаре в модальное окно
             window.loadProductInModal = async function(productId) {
                 try {
                     const response = await fetch(`/product_modal/${productId}`);
                     if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
+                        throw new Error(`HTTP ошибка! статус: ${response.status}`);
                     }
                     const html = await response.text();
-                    document.getElementById('productModalBody').innerHTML = html;
-                    openModal();
-                    // Re-initialize any JS specific to the loaded content if necessary
-                    // For example, if product.html has its own scripts for image galleries, etc.
-                    // You might need to call functions from cart_handler.js or other relevant scripts here
-                    // if they need to operate on the newly loaded modal content.
+                    const modalBody = document.getElementById('productModalBody');
+                    if (modalBody) modalBody.innerHTML = html;
+                    
+                    window.openModal(); // Теперь вызывается глобальная openModal
+
+                    // Попытка инициализировать скрипты для содержимого модального окна, если это необходимо
                     if (typeof initializeModalScripts === 'function') {
                         initializeModalScripts(productId);
                     } else {
-                        console.warn('initializeModalScripts function not found. Modal scripts might not be initialized.');
+                        // Это предупреждение не критично для базовой работы модального окна
+                        // console.warn('initializeModalScripts функция не найдена. Скрипты модального окна могут быть не инициализированы.');
                     }
                 } catch (error) {
-                    console.error('Failed to load product details:', error);
-                    document.getElementById('productModalBody').innerHTML = '<p>Не удалось загрузить информацию о товаре. Пожалуйста, попробуйте позже.</p>';
-                    openModal();
+                    console.error('Не удалось загрузить информацию о товаре:', error);
+                    const modalBody = document.getElementById('productModalBody');
+                    if (modalBody) modalBody.innerHTML = '<p>Не удалось загрузить информацию о товаре. Пожалуйста, попробуйте позже.</p>';
+                    window.openModal(); // Теперь вызывается глобальная openModal
                 }
             }
         });
