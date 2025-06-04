@@ -7,7 +7,7 @@ from .product import Product, Specification
 from .category import Category, CategorySpecificationTemplate
 from .order import Order, order_items
 from .visitor import Visitor
-from .review import Review
+from .review import Review, ReviewPhoto, DetailedRating
 from .review_vote import ReviewVote
 from .rating import Rating
 from .feedback import FeedbackMessage
