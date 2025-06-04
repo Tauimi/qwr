@@ -136,8 +136,14 @@ def create_app(config_name=None):
     def delivery_redirect():
         return redirect(url_for('static_pages.delivery'))
         
-    @app.route('/contact')
+    @app.route('/contact', methods=['GET', 'POST'])
     def contact_redirect():
+        # Если это POST запрос, перенаправляем его на обработчик формы обратной связи
+        if request.method == 'POST':
+            # Импортируем функцию submit из модуля feedback
+            from .views.feedback import submit
+            return submit()
+        # Для GET запросов, перенаправляем на страницу контактов
         return redirect(url_for('static_pages.contact'))
         
     @app.route('/sitemap')

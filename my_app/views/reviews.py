@@ -254,9 +254,13 @@ def rate_product(product_id):
         return jsonify({'success': False, 'error': 'Произошла ошибка при сохранении оценки'})
 
 # Добавляем новый маршрут для модального окна (без параметров в URL)
-@reviews_bp.route('/add-modal', methods=['POST'])
+@reviews_bp.route('/add-modal', methods=['POST', 'GET'])
 def add_review_modal():
     """Добавить отзыв о товаре из модального окна"""
+    # Если это GET запрос, просто возвращаем сообщение
+    if request.method == 'GET':
+        return jsonify({'status': 'error', 'message': 'Этот URL принимает только POST запросы'}), 405
+    
     # Получаем ID товара из тела формы
     product_id = request.form.get('product_id')
     if not product_id:
