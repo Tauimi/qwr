@@ -205,30 +205,55 @@ def product(product_id):
     if product_id not in visited_products:
         visited_products.append(product_id)
         session['visited_products'] = visited_products[:10]  # Храним только 10 последних
+    
+    # Загружаем отзывы
+    reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
+    
+    # Загружаем похожие товары
+    related_products = Product.query.filter(
+        Product.category_id == product.category_id,
+        Product.id != product_id
+    ).limit(4).all()
+    
+    return render_template(
+        'product.html',
+        product=product,
+        reviews=reviews,
+        related_products=related_products
+    )
 
 @shop_bp.route('/product_modal/<int:product_id>')
 def product_modal(product_id):
-    product = Product.query.get_or_404(product_id)
-    # Оставляем загрузку похожих товаров
-    related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
-    
-    # Загружаем сами отзывы для отображения списка
-    reviews_list = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
-    
-    # Для общей статистики используем свойства модели Product, которые учитывают и Review и Rating
-    # avg_rating = product.avg_rating # product.avg_rating уже есть, он учитывает и Review и Rating
-    # total_reviews = product.total_ratings_count # product.total_ratings_count тоже учитывает все
-
-    # --- УДАЛЕН ОТЛАДОЧНЫЙ ВЫВОД (если он был здесь) ---
-
-    return render_template('product_modal_content.html', 
+    try:
+        # Получаем товар или возвращаем 404, если не найден
+        product = Product.query.get_or_404(product_id)
+        
+        # Загружаем похожие товары с обработкой ошибок
+        try:
+            related_products = Product.query.filter(
+                Product.category_id == product.category_id, 
+                Product.id != product_id
+            ).limit(4).all()
+        except Exception as e:
+            current_app.logger.error(f"Ошибка при загрузке похожих товаров: {str(e)}")
+            related_products = []
+        
+        # Загружаем отзывы с обработкой ошибок
+        try:
+            reviews_list = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
+        except Exception as e:
+            current_app.logger.error(f"Ошибка при загрузке отзывов: {str(e)}")
+            reviews_list = []
+        
+        # Возвращаем шаблон с нужными данными
+        return render_template('product_modal_content.html', 
                            product=product, 
                            related_products=related_products,
-                           reviews_list=reviews_list, # Переименовал во избежание путаницы с product.reviews
-                           # product.avg_rating и product.total_ratings_count будут доступны через объект product
-                           # avg_rating=product.avg_rating, # Можно передать явно, если в шаблоне так удобнее
-                           # total_reviews=product.total_ratings_count # Можно передать явно
-                           )
+                           reviews_list=reviews_list)
+    except Exception as e:
+        # Логируем общую ошибку
+        current_app.logger.error(f"Ошибка в product_modal для товара {product_id}: {str(e)}")
+        abort(500, description=f"Ошибка при загрузке модального окна товара: {str(e)}")
 
 @shop_bp.route('/search')
 def search():
