@@ -215,7 +215,7 @@
         <h3 class="reviews-title-modal">Отзывы о товаре (<span id="modal-review-count-{{product.id}}">{{ reviews_list|length }}</span>)</h3>
         <div id="modal-reviews-list-container-{{product.id}}"> {# Container for dynamic updates #}
             {% if reviews_list %}
-                <div class="reviews-list-modal">
+            <div class="reviews-list-modal">
                     {% for review in reviews_list %}
                     <div class="review-item-modal" id="review-modal-{{ review.id }}">
                         <div class="review-header-modal">
@@ -255,7 +255,7 @@
                                     <i class="far fa-star star-icon-empty"></i>
                                     <i class="fas fa-star star-icon-filled"></i>
                                 </label>
-                            {% endfor %}
+                {% endfor %}
                         </div>
                         <div id="rating-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
                     </div>
@@ -347,7 +347,10 @@
             const submitButton = this.querySelector('button[type="submit"]');
             if(submitButton) submitButton.disabled = true;
 
-            fetch(`{{ url_for('reviews.add_review', product_id=product.id) }}`, {
+            const fetchUrl = `{{ url_for('reviews.add_review', product_id=product.id) }}`;
+            console.log('[Modal Review Form] Submitting review to URL:', fetchUrl, 'with method: POST', 'Product ID from template: {{ product.id }}');
+
+            fetch(fetchUrl, {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -426,12 +429,18 @@
                             const currentCount = parseInt(reviewCountSpan.textContent || '0') + 1;
                             reviewCountSpan.textContent = currentCount;
                         }
-                        // Also update the main product rating display if it exists
-                        const overallRatingValueEl = document.getElementById(`modal-overall-rating-value-${productId}`);
-                        const overallRatingCountEl = document.getElementById(`modal-overall-reviews-count-${productId}`);
-                        const overallStarsContainer = document.getElementById(`modal-overall-stars-${productId}`);
-                        if (typeof window.updateOverallRatingDisplay === 'function') {
-                            window.updateOverallRatingDisplay(productId, data.new_avg_rating, data.new_total_ratings); // Assuming server sends these back
+                        
+                        let avgRatingToUpdate, totalRatingsToUpdate;
+                        if (data.review && data.review.avg_rating !== undefined && data.review.total_ratings_count !== undefined) {
+                            avgRatingToUpdate = data.review.avg_rating;
+                            totalRatingsToUpdate = data.review.total_ratings_count;
+                        } else if (data.new_avg_rating !== undefined && data.new_total_ratings !== undefined) {
+                            avgRatingToUpdate = data.new_avg_rating;
+                            totalRatingsToUpdate = data.new_total_ratings;
+                        }
+
+                        if (typeof window.updateOverallRatingDisplay === 'function' && avgRatingToUpdate !== undefined && totalRatingsToUpdate !== undefined) {
+                            window.updateOverallRatingDisplay(productId, avgRatingToUpdate, totalRatingsToUpdate);
                         }
 
                     }
@@ -475,7 +484,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (messageContainer) {
-                        messageContainer.textContent = data.success ? `Спасибо за быструю оценку: ${rating}/5` : (data.error || 'Ошибка.');
+                        messageContainer.textContent = data.success ? \`Спасибо за быструю оценку: \${rating}/5\` : (data.error || 'Ошибка.');
                     }
                     if (data.success) {
                         let parent = this.closest('.star-rating-row');
@@ -485,8 +494,7 @@
                             });
                         }
                         
-                        // Update main product rating display elements
-                        if (typeof window.updateOverallRatingDisplay === 'function') {
+                        if (typeof window.updateOverallRatingDisplay === 'function' && data.avg_rating !== undefined && data.ratings_count !== undefined) {
                             window.updateOverallRatingDisplay(productId, data.avg_rating, data.ratings_count);
                         }
                     }
@@ -502,21 +510,17 @@
         // else console.warn('[Modal Content Script] Quick Rating container NOT found for productId:', productId);
     }
 
-    // Function to update overall rating display (can be called by review submission and quick rating)
-    // This should ideally be part of a global script if initializeModalScripts is responsible for it.
-    // For now, defining it here for self-containment if initializeModalScripts doesn't cover it.
     if (typeof window.updateOverallRatingDisplay !== 'function') {
         window.updateOverallRatingDisplay = function(pId, avgRating, totalRatings) {
-            // console.log(`Updating overall display for ${pId}: avg=${avgRating}, total=${totalRatings}`);
             const overallRatingValueEl = document.getElementById(`modal-overall-rating-value-${pId}`);
             const overallRatingCountEl = document.getElementById(`modal-overall-reviews-count-${pId}`);
             const overallStarsContainer = document.getElementById(`modal-overall-stars-${pId}`);
 
             if (avgRating !== undefined && overallRatingValueEl) {
-                overallRatingValueEl.textContent = `${parseFloat(avgRating).toFixed(1)}/5`;
+                overallRatingValueEl.textContent = \`\${parseFloat(avgRating).toFixed(1)}/5\`;
             }
             if (totalRatings !== undefined && overallRatingCountEl) {
-                overallRatingCountEl.textContent = `(${totalRatings} ${totalRatings == 1 ? 'оценка' : (1 < totalRatings && totalRatings < 5 ? 'оценки' : 'оценок')})`;
+                overallRatingCountEl.textContent = \`(\${totalRatings} \${totalRatings == 1 ? 'оценка' : (1 < totalRatings && totalRatings < 5 ? 'оценки' : 'оценок')})\`;
             }
             if (avgRating !== undefined && overallStarsContainer) {
                 let avgRatingVal = parseFloat(avgRating);
@@ -530,13 +534,7 @@
             }
         };
     }
-
-    // Call to initialize other modal scripts (like favorites, compare, etc.)
-    // This is typically done by loadProductInModal in layout.html AFTER this content is injected.
-    // If window.initializeModalScripts is defined globally and handles these, it will be called.
-    // No explicit call here to avoid double initialization if layout.html already does it.
-
 })();
 </script>
 
-</rewritten_file>
+</div> {# Closes product-details-modal-view #}
