@@ -228,7 +228,7 @@ def product_modal(product_id):
         # Получаем товар или возвращаем 404, если не найден
         product = Product.query.get_or_404(product_id)
         
-        # Загружаем похожие товары с обработкой ошибок
+        # Загружаем похожие товары, но обрабатываем возможные ошибки
         try:
             related_products = Product.query.filter(
                 Product.category_id == product.category_id, 
@@ -238,22 +238,28 @@ def product_modal(product_id):
             current_app.logger.error(f"Ошибка при загрузке похожих товаров: {str(e)}")
             related_products = []
         
-        # Загружаем отзывы с обработкой ошибок
+        # Загружаем отзывы, но обрабатываем возможные ошибки
         try:
             reviews_list = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
         except Exception as e:
             current_app.logger.error(f"Ошибка при загрузке отзывов: {str(e)}")
             reviews_list = []
         
-        # Возвращаем шаблон с нужными данными
+        # Возвращаем шаблон с данными
         return render_template('product_modal_content.html', 
-                           product=product, 
-                           related_products=related_products,
-                           reviews_list=reviews_list)
+                            product=product, 
+                            related_products=related_products,
+                            reviews_list=reviews_list)
     except Exception as e:
         # Логируем общую ошибку
         current_app.logger.error(f"Ошибка в product_modal для товара {product_id}: {str(e)}")
-        abort(500, description=f"Ошибка при загрузке модального окна товара: {str(e)}")
+        # Вместо аборта с ошибкой 500, вернем сообщение об ошибке в модальном окне
+        return f"""
+        <div style="padding: 20px; text-align: center;">
+            <h2>Произошла ошибка</h2>
+            <p>При загрузке данных возникла ошибка. Пожалуйста, попробуйте позже.</p>
+        </div>
+        """
 
 @shop_bp.route('/search')
 def search():
