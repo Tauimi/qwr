@@ -154,31 +154,61 @@ def seed_db():
             print(f"Таблицы базы данных не найдены. Создаем таблицы: {e}")
             db.create_all()
             print("Таблицы успешно созданы.")
+        
+        # Проверяем, есть ли уже данные в базе
+        existing_categories = Category.query.count()
+        if existing_categories > 0:
+            print(f"База данных уже содержит {existing_categories} категорий. Пропускаем заполнение.")
+            return False
 
         # Создаем категории и подкатегории
         for category_data in CATEGORIES:
-            category = Category(
-                name=category_data["name"],
-                slug=slugify(category_data["name"]),
-                description=category_data["description"]
-            )
-            db.session.add(category)
-            db.session.commit()
-
-            print(f"Создана категория: {category.name}")
+            # Проверяем, существует ли категория с таким slug
+            slug = slugify(category_data["name"])
+            existing_category = Category.query.filter_by(slug=slug).first()
+            
+            if existing_category:
+                print(f"Категория с slug '{slug}' уже существует. Пропускаем.")
+                category = existing_category
+            else:
+                category = Category(
+                    name=category_data["name"],
+                    slug=slug,
+                    description=category_data["description"]
+                )
+                db.session.add(category)
+                try:
+                    db.session.commit()
+                    print(f"Создана категория: {category.name}")
+                except Exception as e:
+                    db.session.rollback()
+                    print(f"Ошибка при создании категории {category.name}: {e}")
+                    continue
 
             # Добавляем подкатегории
             for subcategory_data in category_data["subcategories"]:
-                subcategory = Category(
-                    name=subcategory_data["name"],
-                    slug=slugify(subcategory_data["name"]),
-                    description=subcategory_data["description"],
-                    parent_id=category.id
-                )
-                db.session.add(subcategory)
-                db.session.commit()
-
-                print(f"  - Создана подкатегория: {subcategory.name}")
+                # Проверяем, существует ли подкатегория с таким slug
+                subcategory_slug = slugify(subcategory_data["name"])
+                existing_subcategory = Category.query.filter_by(slug=subcategory_slug).first()
+                
+                if existing_subcategory:
+                    print(f"  - Подкатегория с slug '{subcategory_slug}' уже существует. Пропускаем.")
+                    subcategory = existing_subcategory
+                else:
+                    subcategory = Category(
+                        name=subcategory_data["name"],
+                        slug=subcategory_slug,
+                        description=subcategory_data["description"],
+                        parent_id=category.id
+                    )
+                    db.session.add(subcategory)
+                    try:
+                        db.session.commit()
+                        print(f"  - Создана подкатегория: {subcategory.name}")
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f"  - Ошибка при создании подкатегории {subcategory.name}: {e}")
+                        continue
 
                 # Генерируем товары для подкатегории
                 num_products = random.randint(5, 15)  # Случайное количество товаров от 5 до 15
@@ -212,7 +242,6 @@ def seed_db():
                     is_sale = random.choice([True, False])
                     old_price = round(price * random.uniform(1.1, 1.5), -1) if is_sale else None  # Старая цена на 10-50% выше
 
-                    # Создаем товар
                     # Создаем базовый slug и проверяем его уникальность
                     base_slug = slugify(product_name)
                     unique_slug = base_slug
@@ -222,6 +251,7 @@ def seed_db():
 
                     # Если существует, добавляем короткий случайный суффикс
                     if existing_product:
+                        print(f"    * Товар с slug '{unique_slug}' уже существует. Создаем уникальный slug.")
                         suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=4))
                         unique_slug = f"{base_slug}-{suffix}"
 
@@ -241,7 +271,12 @@ def seed_db():
                     )
 
                     db.session.add(product)
-                    db.session.commit()
+                    try:
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        print(f"    * Ошибка при создании товара {product_name}: {e}")
+                        continue
 
                     # Добавляем характеристики товара
                     if subcategory.name in CATEGORY_SPECS_MAP:
@@ -253,12 +288,16 @@ def seed_db():
                                 value=random.choice(spec_values)
                             )
                             db.session.add(spec)
-
-                        db.session.commit()
-
-                    print(f"    * Создан товар: {product.name} - {product.price} руб.")
+                        
+                        try:
+                            db.session.commit()
+                            print(f"    * Создан товар: {product.name} - {product.price} руб.")
+                        except Exception as e:
+                            db.session.rollback()
+                            print(f"    * Ошибка при добавлении характеристик для товара {product.name}: {e}")
 
         print("База данных успешно заполнена!")
+        return True
 
 
 if __name__ == "__main__":

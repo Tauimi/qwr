@@ -17,7 +17,7 @@ from my_app import create_app
 from my_app.extensions import db
 
 # Создаем экземпляр приложения
-app = create_app(os.getenv('APP_SETTINGS', 'development'))
+app = create_app(os.getenv('APP_SETTINGS', 'production'))  # Используем production по умолчанию для Railway
 
 # Определяем стандартную переменную application для совместимости с WSGI серверами
 application = app
@@ -26,23 +26,24 @@ application = app
 database_url = os.environ.get('DATABASE_URL')
 with app.app_context():
     try:
-        # Создаем все таблицы в базе данных
-        # db.create_all() # <--- Удалите или закомментируйте эту строку
-        # print("✅ Схема базы данных создана/обновлена") # <--- И эту тоже
+        # Проверяем соединение с базой данных
+        db.engine.connect()
+        print("✅ Подключение к базе данных успешно")
         
         if database_url:
-            print("✅ База данных настроена, инициализируем данные...")
-            # Импортируем и запускаем скрипт заполнения базы данных
-            try:
-                from seed_db import seed_db
-                result = seed_db()
-                if result:
-                    print("✅ База данных заполнена тестовыми данными")
-                else:
-                    print("ℹ️ База данных уже содержит данные, дополнительное заполнение не требуется")
-            except Exception as e:
-                print(f"⚠️ Ошибка заполнения базы данных: {str(e)}")
-                print("   Продолжаем работу с существующими данными")
+            print("✅ База данных настроена")
+            # Импортируем и запускаем скрипт заполнения базы данных только если это явно указано
+            if os.environ.get('SEED_DATABASE', 'False') == 'True':
+                try:
+                    from seed_db import seed_db
+                    result = seed_db()
+                    if result:
+                        print("✅ База данных заполнена тестовыми данными")
+                    else:
+                        print("ℹ️ База данных уже содержит данные, дополнительное заполнение не требуется")
+                except Exception as e:
+                    print(f"⚠️ Ошибка заполнения базы данных: {str(e)}")
+                    print("   Продолжаем работу с существующими данными")
         else:
             print("ℹ️ База данных не настроена")
             print("   Приложение запущено в демо-режиме с локальной SQLite базой")

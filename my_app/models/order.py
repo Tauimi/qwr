@@ -3,6 +3,7 @@
 """
 from datetime import datetime
 from my_app.extensions import db
+from my_app.models.product import Product  # Импортируем модель Product напрямую
 
 # Таблица для связи многие-ко-многим между Product и Order
 order_items = db.Table('order_items',
@@ -40,7 +41,7 @@ class Order(db.Model):
         """Возвращает товары с их количеством и ценой"""
         result = []
         for item in db.session.query(order_items).filter_by(order_id=self.id).all():
-            product = db.session.query(db.models.Product).get(item.product_id)
+            product = db.session.query(Product).get(item.product_id)
             if product:
                 result.append({
                     'product': product,

@@ -221,8 +221,6 @@ def product_modal(product_id):
                            reviews=reviews,
                            total_reviews=total_reviews,
                            avg_rating=avg_rating)
-    
-    return render_template('product.html', product=product)
 
 @shop_bp.route('/search')
 def search():

@@ -8,7 +8,7 @@ from my_app.extensions import db
 from my_app.models import User
 
 # Создаем экземпляр приложения
-app = create_app(os.getenv('APP_SETTINGS', 'development'))
+app = create_app(os.getenv('APP_SETTINGS', 'production'))  # Используем production по умолчанию для Railway
 
 def init_db():
     """Инициализирует базу данных"""
@@ -32,6 +32,8 @@ def init_db():
             print("Создан аккаунт администратора:")
             print("Логин: admin")
             print("Пароль: admin123")
+        else:
+            print("Аккаунт администратора уже существует")
         
         print("База данных инициализирована успешно!")
 
@@ -43,6 +45,12 @@ def create_migration_folder():
         print(f"Создана директория для миграций: {migrations_dir}")
     else:
         print(f"Директория для миграций уже существует: {migrations_dir}")
+        
+    # Создаем папку versions если её нет
+    versions_dir = os.path.join(migrations_dir, 'versions')
+    if not os.path.exists(versions_dir):
+        os.makedirs(versions_dir)
+        print(f"Создана директория для версий миграций: {versions_dir}")
 
 if __name__ == "__main__":
     print("Инициализация базы данных...")

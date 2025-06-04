@@ -1,2 +1,1 @@
-
-web: flask db upgrade && python seed_db.py && gunicorn wsgi:application
+web: flask db upgrade && python migration.py && gunicorn wsgi:application

@@ -1,56 +1,56 @@
 """
-Скрипт для выполнения миграции базы данных PostgreSQL
+Скрипт для выполнения миграции базы данных
 """
 import os
 import sys
-import psycopg2
-from psycopg2 import sql
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from flask_migrate import upgrade, stamp, migrate, init
 from my_app import create_app
+from my_app.extensions import db
 
 def execute_migration():
-    """Выполняет миграцию базы данных для добавления колонки sku"""
-    # Получаем URL базы данных из переменной окружения
-    database_url = os.environ.get('DATABASE_URL', '')
-    
+    """Выполняет миграцию базы данных через Flask-Migrate"""
+    # Создаем экземпляр приложения
+    app = create_app(os.getenv('APP_SETTINGS', 'production'))
+
+    # Проверяем наличие переменной окружения DATABASE_URL
+    database_url = os.environ.get('DATABASE_URL')
     if not database_url:
-        print("Ошибка: Не указан URL базы данных")
-        sys.exit(1)
-    
-    # Преобразование URL из формата postgres:// в postgresql:// для psycopg2
-    if database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://')
-    
+        print("Предупреждение: Не указан URL базы данных. Используется SQLite.")
     try:
-        # Подключаемся к базе данных
-        conn = psycopg2.connect(database_url)
-        conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
-        cursor = conn.cursor()
+        with app.app_context():
+            # Проверяем существует ли каталог migrations/versions
+            migrations_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'migrations', 'versions')
+
+            if not os.path.exists(migrations_dir):
+                print("Каталог миграций не существует. Инициализируем миграции...")
+                init()
+                print("Миграции инициализированы.")
+
+            # Проверяем, существует ли колонка sku в таблице products
+            inspect = db.inspect(db.engine)
+            if inspect.has_table('products'):
+                columns = [column['name'] for column in inspect.get_columns('products')]
+                if 'sku' not in columns:
+                    print("Колонка 'sku' не существует в таблице products. Создаем миграцию...")
+                    # Создаем миграцию
+                    migrate(message="Add sku column to products")
+                    print("Миграция создана.")
+
+                    # Применяем миграцию
+                    upgrade()
+                    print("Миграция применена.")
+                else:
+                    print("Колонка 'sku' уже существует в таблице products.")
+                    # Ставим метку текущей версии базы данных
+                    stamp()
+            else:
+                print("Таблица 'products' не существует. Создаем схему базы данных...")
+                db.create_all()
+                print("Схема базы данных создана.")
         
-        # Проверяем существование колонки sku
-        cursor.execute("""
-            SELECT column_name 
-            FROM information_schema.columns 
-            WHERE table_name = 'products' AND column_name = 'sku';
-        """)
-        
-        column_exists = cursor.fetchone()
-        
-        if not column_exists:
-            print("Колонка 'sku' не существует. Добавляем...")
-            # Добавляем колонку sku
-            cursor.execute(sql.SQL("""
-                ALTER TABLE products 
-                ADD COLUMN sku VARCHAR(50) NULL;
-            """))
-            print("Колонка 'sku' успешно добавлена.")
-        else:
-            print("Колонка 'sku' уже существует.")
-        
-        # Закрываем соединение
-        cursor.close()
-        conn.close()
-        
+                # Инициализируем миграции и ставим метку
+                stamp()
+                print("Метка текущей версии базы данных установлена.")
         print("Миграция успешно завершена.")
         return True
     
@@ -59,8 +59,5 @@ def execute_migration():
         return False
 
 if __name__ == "__main__":
-    # Создаем приложение для доступа к контексту, если нужно
-    app = create_app(os.getenv('APP_SETTINGS', 'development'))
-    
     print("Запуск миграции базы данных...")
     execute_migration()
