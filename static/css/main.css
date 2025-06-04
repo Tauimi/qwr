@@ -28,26 +28,25 @@ body {
 .modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    z-index: 1050; /* Выше чем другие элементы, но ниже чем accessibility panel */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
     height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    background-color: rgba(0, 0, 0, 0.6); /* Более темный фон */
 }
 
 .modal-content {
-    background-color: #fefefe; /* Будет переопределено переменной --card-bg из style.css, если доступно */
-    margin: 5% auto; /* Уменьшим отступ сверху для лучшего вида на больших экранах */
-    padding: 25px;
-    /* border: 1px solid #888; */ /* Убираем старую рамку */
-    border: none; /* Убираем рамку */
-    width: 90%; /* Немного увеличим ширину по умолчанию */
-    max-width: 650px; /* Слегка уменьшим максимальную ширину для компактности */
-    border-radius: 12px; /* Более современное скругление */
+    background-color: var(--modal-bg);
+    margin: 5% auto; /* Уменьшил верхний отступ, чтобы окно было выше */
+    padding: 30px; /* Увеличил внутренние отступы */
+    border-radius: 12px; /* Более скругленные углы */
+    width: 90%; /* Ширина относительно родителя */
+    max-width: 850px; /* Увеличиваем максимальную ширину модального окна */
     position: relative;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); /* Более мягкая и современная тень */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); /* Более мягкая и выраженная тень */
+    color: var(--modal-text-color);
 }
 
 .close-button {

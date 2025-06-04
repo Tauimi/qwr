@@ -1,0 +1,53 @@
+/* static/css/news.css */
+
+.news-list .news-item {
+    border: 1px solid var(--border-color);
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    transition: box-shadow 0.3s ease;
+}
+
+.news-list .news-item:hover {
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.news-list .news-item .card-title a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.news-list .news-item .card-title a:hover {
+    text-decoration: underline;
+}
+
+.news-detail-content h1 {
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+}
+
+.news-detail-content .text-muted {
+    color: var(--text-muted-color) !important; /* !important для переопределения bootstrap, если нужно */
+    font-size: 0.9em;
+}
+
+.news-full-content {
+    line-height: 1.7;
+    color: var(--text-color);
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb {
+    background-color: var(--card-bg);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb-item a {
+    color: var(--primary-color);
+}
+
+.breadcrumb-item.active {
+    color: var(--text-muted-color);
+} 

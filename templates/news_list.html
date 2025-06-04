@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ title }} - {{ super() }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/news.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ title }}</h1>
+    <hr>
+    {% if news_items %}
+        <div class="news-list">
+            {% for item in news_items %}
+                <div class="news-item card mb-3">
+                    <div class="card-body">
+                        <h2 class="card-title"><a href="{{ url_for('news.news_detail', news_id=item.id) }}">{{ item.title }}</a></h2>
+                        <p class="card-subtitle mb-2 text-muted">{{ item.date }}</p>
+                        <p class="card-text">{{ item.short_description }}</p>
+                        <a href="{{ url_for('news.news_detail', news_id=item.id) }}" class="btn btn-primary">Читать далее</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Новостей пока нет.</p>
+    {% endif %}
+</div>
+{% endblock %} 

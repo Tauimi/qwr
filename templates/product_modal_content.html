@@ -30,12 +30,12 @@
     }
     
     .specifications-table tr:nth-child(even) {
-        background: #f8f9fa;
+        background: var(--table-stripe-bg, #f8f9fa);
     }
     
     .specifications-table td {
         padding: 8px; /* Adjusted padding */
-        border: 1px solid #eee;
+        border: 1px solid var(--border-color, #eee);
     }
     
     .specifications-table td:first-child {
@@ -47,6 +47,72 @@
         /* max-height: 60vh; /* Example, adjust as needed */
         /* overflow-y: auto; /* Handled by #productModalBody now */
     }
+
+    /* Styles for reviews in modal */
+    .reviews-section-modal {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color, #eee);
+    }
+    .reviews-section-modal .reviews-title-modal, 
+    .reviews-section-modal .add-review-title-modal {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: var(--text-color);
+    }
+    .review-item-modal {
+        padding: 15px;
+        border: 1px solid var(--border-color, #ddd);
+        border-radius: 6px;
+        margin-bottom: 15px;
+        background-color: var(--card-secondary-bg, #f9f9f9);
+    }
+    .review-header-modal {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .review-author-modal {
+        font-weight: bold;
+        color: var(--text-color);
+    }
+    .review-date-modal {
+        font-size: 0.9em;
+        color: var(--text-muted-color);
+        margin-left: 10px;
+    }
+    .review-rating-stars-modal .fas.fa-star { color: #ffc107; }
+    .review-rating-stars-modal .far.fa-star { color: var(--star-empty-color, #e4e5e9); }
+    .review-rating-stars-modal .rating-value-text {
+        font-size: 0.9em;
+        margin-left: 5px;
+    }
+
+    .review-title-text-modal {
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 1.1em;
+        color: var(--text-color);
+    }
+    .review-text-modal {
+        line-height: 1.6;
+        color: var(--text-color);
+        white-space: pre-wrap; /* To respect newlines in review text */
+    }
+    .modal-overall-rating-summary {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 0.95em;
+    }
+    .modal-overall-rating-summary .stars .fas.fa-star, 
+    .modal-overall-rating-summary .stars .fas.fa-star-half-alt { color: #ffc107; }
+    .modal-overall-rating-summary .stars .far.fa-star { color: var(--star-empty-color, #e4e5e9); }
+    .modal-overall-rating-summary .rating-value { font-weight: bold; }
+    .modal-overall-rating-summary .reviews-count { color: var(--text-muted-color); }
 </style>
 
 <div class="product-details-modal-view">
@@ -54,11 +120,25 @@
     
     <div class="product-details">
         <div class="product-gallery">
-            <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}" style="max-width: 100%; height: auto;">
+            <img src="{{ url_for('static', filename='images/' + product.image if product.image else 'images/default-product.jpg') }}" 
+                 alt="{{ product.name }}" class="thumbnail" 
+                 data-full-image="{{ url_for('static', filename='images/' + product.image if product.image else 'images/default-product.jpg') }}" 
+                 style="max-width: 100%; height: auto; border-radius: 6px; object-fit: cover;">
         </div>
         
         <div class="product-detail-info">
             <h1 class="product-detail-title">{{ product.name }}</h1>
+            
+            {# Overall Rating Summary #}
+            <div class="modal-overall-rating-summary">
+                {% set avg_rating_val = product.avg_rating %}
+                <div class="stars" id="modal-overall-stars-{{product.id}}">
+                    {% for i in range(1, 6) %}{% if i <= avg_rating_val|round(0, 'common') %}<i class="fas fa-star"></i>{% elif i - 0.5 <= avg_rating_val %}<i class="fas fa-star-half-alt"></i>{% else %}<i class="far fa-star"></i>{% endif %}{% endfor %}
+                </div>
+                <span class="rating-value" id="modal-overall-rating-value-{{product.id}}">{{ avg_rating_val|round(1) if avg_rating_val else '0' }}/5</span>
+                <span class="reviews-count" id="modal-overall-reviews-count-{{product.id}}">({{ product.total_ratings_count }} {{ 'оценка' if product.total_ratings_count == 1 else ('оценки' if 1 < product.total_ratings_count < 5 else 'оценок') }})</span>
+            </div>
+
             <div class="product-detail-price">{{ product.price }} ₽</div>
             
             <div class="product-actions">
@@ -66,7 +146,6 @@
                     <button type="button" class="favorite-btn {% if product.id in session.get('favorites', []) %}active{% endif %}" 
                             data-product-id="{{ product.id }}" aria-label="Добавить в избранное" title="Добавить в избранное">
                         <i class="fas fa-heart"></i>
-                        <span class="favorite-count">{{ session.get('favorites', [])|length }}</span>
                     </button>
                 </div>
                 
@@ -74,17 +153,12 @@
                     <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
                         <div class="quantity-control">
                             <button type="button" class="quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
-                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" aria-label="Количество товара" title="Количество товара">
-                            <button type="button" class="quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
+                            <input type="number" name="quantity" value="1" min="1" max="{{ product.stock if product.stock > 0 else 1 }}" aria-label="Количество товара" title="Количество товара" {% if product.stock == 0 %}disabled{% endif %}>
+                            <button type="button" class="quantity-increase" aria-label="Увеличить количество" title="Увеличить количество" {% if product.stock == 0 %}disabled{% endif %}>+</button>
                         </div>
                         
                         <div class="cart-controls">
-                            <button type="submit" class="add-to-cart-large">В корзину</button>
-                            <div class="cart-quantity-controls" style="display: none;">
-                                <button type="button" class="cart-quantity-decrease" aria-label="Уменьшить количество" title="Уменьшить количество">-</button>
-                                <span class="cart-quantity-value">1</span>
-                                <button type="button" class="cart-quantity-increase" aria-label="Увеличить количество" title="Увеличить количество">+</button>
-                            </div>
+                            <button type="submit" class="add-to-cart-large" {% if product.stock == 0 %}disabled{% endif %}>В корзину</button>
                         </div>
                     </form>
                     
@@ -100,29 +174,23 @@
                 {{ product.description|safe }}
             </div>
             
-            <!-- Quick rating might need JS re-initialization if used in modal -->
+            {# Quick rating - keep it if desired, or remove if full reviews are enough #}
             <div class="quick-rating-box">
-                <div class="quick-rating-title">Оцените товар</div>
-                <div class="quick-rating-stars" id="quick-rating-stars-modal-{{ product.id }}"> {# Unique ID for modal context #}
+                <div class="quick-rating-title">Оцените товар (быстрая оценка)</div>
+                <div class="quick-rating-stars" id="quick-rating-stars-modal-{{ product.id }}">
                     <div class="star-rating-row">
                         {% for i in range(1, 6) %}
-                            <span class="quick-star" data-rating="{{ i }}">
-                                <i class="far fa-star"></i>
-                            </span>
+                            <span class="quick-star" data-rating="{{ i }}"><i class="far fa-star"></i></span>
                         {% endfor %}
                     </div>
-                    <div class="quick-rating-message" id="rating-result-modal-{{ product.id }}">
-                        Нажмите на звезду, чтобы оценить товар
-                    </div>
+                    <div class="quick-rating-message" id="rating-result-modal-{{ product.id }}">Нажмите на звезду, чтобы оценить товар</div>
                 </div>
             </div>
             
             <div class="stock-indicator {% if product.stock > 5 %}in-stock{% elif product.stock > 0 %}low-stock{% else %}out-of-stock{% endif %}">
                 <i class="fas {% if product.stock > 5 %}fa-check-circle{% elif product.stock > 0 %}fa-exclamation-circle{% else %}fa-times-circle{% endif %}"></i>
-                {% if product.stock > 5 %}
-                    В наличии
-                {% elif product.stock > 0 %}
-                    Мало ({{ product.stock }} шт.)
+                {% if product.stock > 0 %}
+                    {{ "В наличии" if product.stock > 5 else ("Мало (" + product.stock|string + " шт.)") }}
                 {% else %}
                     Нет в наличии
                 {% endif %}
@@ -142,24 +210,74 @@
         </table>
     </div>
 
-    {# Reviews Section - adapted for modal #}
+    {# Reviews Section - NEW #}
     <div class="reviews-section-modal">
-        <h3 class="reviews-title">Отзывы о товаре ({{ reviews|length }})</h3>
-        {% if reviews %}
-            <div class="reviews-list-modal">
-                {% for review in reviews %}
-                <div class="review-item-modal">
-                    <div class="review-author-modal">{{ review.user_name }} <span class="review-date-modal">{{ review.created_at.strftime('%d.%m.%Y') }}</span></div>
-                    <div class="review-rating-modal">Оценка: {{ review.rating }}/5</div>
-                    <div class="review-text-modal">{{ review.text }}</div>
+        <h3 class="reviews-title-modal">Отзывы о товаре (<span id="modal-review-count-{{product.id}}">{{ reviews_list|length }}</span>)</h3>
+        <div id="modal-reviews-list-container-{{product.id}}"> {# Container for dynamic updates #}
+            {% if reviews_list %}
+                <div class="reviews-list-modal">
+                    {% for review in reviews_list %}
+                    <div class="review-item-modal" id="review-modal-{{ review.id }}">
+                        <div class="review-header-modal">
+                            <span class="review-author-modal">{{ review.username|escape }}</span>
+                            <span class="review-date-modal">{{ review.formatted_date }}</span>
+                        </div>
+                        <div class="review-rating-stars-modal">
+                            {% for i in range(1, 6) %}
+                                {% if i <= review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                            {% endfor %}
+                            <span class="rating-value-text"> {{ review.rating }}/5</span>
+                        </div>
+                        {% if review.title %}
+                            <h4 class="review-title-text-modal">{{ review.title|escape }}</h4>
+                        {% endif %}
+                        <div class="review-text-modal">{{ review.content|escape|nl2br }}</div> {# nl2br if you want to preserve newlines as <br> #}
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+            {% else %}
+                <p id="no-reviews-message-modal-{{product.id}}" class="text-muted">Отзывов пока нет. Будьте первым!</p>
+            {% endif %}
+        </div>
+
+        {# Form to add review #}
+        {% if session.user_id %}
+            <div class="add-review-section-modal">
+                <h3 class="add-review-title-modal">Оставить свой отзыв</h3>
+                <form class="review-form-modal" id="review-form-modal-{{ product.id }}" method="post" novalidate>
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Ваша оценка:</label>
+                        <div class="star-rating" id="form-star-rating-modal-{{product.id}}">
+                            {% for i in range(5, 0, -1) %}
+                                <input type="radio" id="star-modal-{{ product.id }}-{{ i }}" name="rating" value="{{ i }}" class="star-radio" required>
+                                <label for="star-modal-{{ product.id }}-{{ i }}" title="{{ i }} звезд">
+                                    <i class="far fa-star star-icon-empty"></i>
+                                    <i class="fas fa-star star-icon-filled"></i>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        <div id="rating-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="review-title-modal-{{ product.id }}" class="form-label">Заголовок отзыва (необязательно)</label>
+                        <input type="text" id="review-title-modal-{{ product.id }}" name="title" class="form-control">
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label for="review-content-modal-{{ product.id }}" class="form-label">Ваш отзыв</label>
+                        <textarea id="review-content-modal-{{ product.id }}" name="content" class="form-control" rows="4" required></textarea>
+                        <div id="content-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary submit-review-modal-btn">Опубликовать отзыв</button>
+                    <div id="review-form-message-modal-{{product.id}}" class="mt-2"></div>
+                </form>
             </div>
         {% else %}
-            <p>Отзывов пока нет. Будьте первым!</p>
+            <p class="mt-3 text-muted">Чтобы оставить отзыв, пожалуйста, <a href="{{ url_for('auth.login', next=request.url) }}">войдите</a> или <a href="{{ url_for('auth.register') }}">зарегистрируйтесь</a>.</p>
         {% endif %}
-        {# Form to add review - might need JS to handle submission from modal #}
-        {# Consider if adding reviews directly in modal is desired UX #}
     </div>
 
     {# Related Products Section - adapted for modal #}
@@ -169,8 +287,8 @@
         <div class="related-products-grid-modal">
             {% for rel_product in related_products %}
             <div class="related-product-card-modal">
-                <a href="#" onclick="loadProductInModal({{ rel_product.id }}); return false;">
-                    <img src="{{ url_for('static', filename='images/' + rel_product.image) }}" alt="{{ rel_product.name }}" class="related-product-image-modal">
+                <a href="#" onclick="window.loadProductInModal({{ rel_product.id }}); return false;">
+                    <img src="{{ url_for('static', filename='images/' + rel_product.image if rel_product.image else 'images/default-product.jpg') }}" alt="{{ rel_product.name }}" class="related-product-image-modal">
                     <div class="related-product-name-modal">{{ rel_product.name }}</div>
                     <div class="related-product-price-modal">{{ rel_product.price }} ₽</div>
                 </a>
@@ -184,273 +302,241 @@
 {# Scripts that might be needed for dynamic content within the modal #}
 {# Ensure these are either already loaded globally or loaded specifically for the modal #}
 {# For example, favorite, compare, add to cart AJAX, quantity controls, star ratings #}
-<script>
-    // Re-initialize or ensure event delegation for dynamic content if necessary
-    // This is a placeholder for where such script re-initializations would go.
-    // Example: if star ratings are dynamically added, their JS might need to be re-run.
-    // Or, better, use event delegation from a parent static element.
+<script type="text/javascript">
+(function() { 
+    const productIdString = "{{ product.id }}";
+    const productId = parseInt(productIdString);
 
-    // Initialize quick rating for the modal if it's not handled by event delegation
-    // This is a simplified example; actual implementation might vary
-    window.initializeModalScripts = function(productId) {
-        console.log('[Modal Scripts] Initializing for productId:', productId);
+    if (isNaN(productId)) {
+        console.error('[Modal Content Script] Product ID is invalid or not available. Parsed from:', productIdString);
+        return;
+    }
+    // console.log('[Modal Content Script] Attaching listeners for productId:', productId);
 
-        // Quick Rating
-        const quickRatingStarsContainer = document.getElementById('quick-rating-stars-modal-' + productId);
-        console.log('[Modal Scripts] Quick Rating Container:', quickRatingStarsContainer);
-        if (quickRatingStarsContainer) {
-            quickRatingStarsContainer.querySelectorAll('.quick-star').forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = this.dataset.rating;
-                    const messageContainer = document.getElementById('rating-result-modal-' + productId);
-                    console.log('[Modal Scripts] Quick Rating Clicked. ProductId:', productId, 'Rating:', rating);
-                    
-                    const formData = new FormData();
-                    formData.append('rating', rating);
-
-                    const rateUrl = `/reviews/rate/${productId}`;
-                    console.log('[Modal Scripts] Quick Rating Fetch URL:', rateUrl);
-                    fetch(rateUrl, {
-                        method: 'POST',
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            // CSRF token, если потребуется
-                            // 'X-CSRFToken': '[CSRF_TOKEN_PLACEHOLDER]' 
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            if(messageContainer) messageContainer.textContent = `Спасибо за вашу оценку: ${rating}/5`;
-                            console.log(`Rated product ${productId} with ${rating} stars. New avg: ${data.avg_rating}, count: ${data.ratings_count}`);
-                            // Визуальное обновление звезд
-                            let parent = this.closest('.star-rating-row');
-                            if(parent){
-                                let starsInRow = parent.querySelectorAll('.quick-star');
-                                starsInRow.forEach((s, index) => {
-                                    s.innerHTML = index < rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-                                });
-                            }
-                            // Тут можно было бы обновить и отображение среднего рейтинга товара в модальном окне,
-                            // если бы для этого было предусмотрено место.
-                        } else {
-                            if(messageContainer) messageContainer.textContent = data.error || 'Ошибка при сохранении оценки.';
-                            console.error('Error submitting rating:', data.error);
-                        }
-                    })
-                    .catch(error => {
-                        if(messageContainer) messageContainer.textContent = 'Ошибка сети при сохранении оценки.';
-                        console.error('Fetch error for rating:', error);
-                    });
-                });
-            });
-        }
-
-        // Add to cart AJAX for modal
-        const addToCartFormModal = document.querySelector('#productModalBody .ajax-add-to-cart');
-        console.log('[Modal Scripts] Add to Cart Form:', addToCartFormModal);
-        if (addToCartFormModal) {
-            // Clone and replace to remove old event listeners if any
-            const newForm = addToCartFormModal.cloneNode(true);
-            addToCartFormModal.parentNode.replaceChild(newForm, addToCartFormModal);
+    // Initialize Review Form
+    const reviewForm = document.getElementById(`review-form-modal-${productId}`);
+    if (reviewForm) {
+        // console.log('[Modal Content Script] Review form found for productId:', productId);
+        reviewForm.addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            newForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(this);
-                const currentProductId = this.dataset.productId;
-                fetch(this.action, { // Action should be correct for currentProductId
+            const formData = new FormData(this);
+            const ratingErrorEl = document.getElementById(`rating-error-modal-${productId}`);
+            const contentErrorEl = document.getElementById(`content-error-modal-${productId}`);
+            const formMessageEl = document.getElementById(`review-form-message-modal-${productId}`);
+
+            if(ratingErrorEl) ratingErrorEl.textContent = '';
+            if(contentErrorEl) contentErrorEl.textContent = '';
+            if(formMessageEl) {
+                formMessageEl.textContent = '';
+                formMessageEl.className = 'mt-2'; 
+            }
+
+            const selectedRating = formData.get('rating');
+            if (!selectedRating) {
+                if(ratingErrorEl) ratingErrorEl.textContent = 'Пожалуйста, поставьте оценку.';
+                return;
+            }
+
+            const reviewContent = formData.get('content');
+            if (!reviewContent || reviewContent.trim() === '') {
+                if(contentErrorEl) contentErrorEl.textContent = 'Текст отзыва не может быть пустым.';
+                return;
+            }
+
+            const submitButton = this.querySelector('button[type="submit"]');
+            if(submitButton) submitButton.disabled = true;
+
+            fetch(`{{ url_for('reviews.add_review', product_id=product.id) }}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errData => {
+                        throw { status: response.status, data: errData }; 
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if(submitButton) submitButton.disabled = false;
+                if (data.status === 'success') {
+                    if(formMessageEl) {
+                        formMessageEl.textContent = data.message || 'Отзыв успешно добавлен!';
+                        formMessageEl.className = 'alert alert-success mt-2';
+                    }
+                    reviewForm.reset();
+                    document.querySelectorAll(`#form-star-rating-modal-${productId} input[type="radio"]`).forEach(rb => rb.checked = false);
+                    document.querySelectorAll(`#form-star-rating-modal-${productId} label`).forEach(lbl => lbl.classList.remove('selected')); 
+
+                    const reviewsListContainer = document.getElementById(`modal-reviews-list-container-${productId}`);
+                    if (reviewsListContainer && data.review) {
+                        const newReview = data.review;
+                        const noReviewsMsg = document.getElementById(`no-reviews-message-modal-${productId}`);
+                        if(noReviewsMsg) noReviewsMsg.style.display = 'none';
+
+                        let reviewsListDiv = reviewsListContainer.querySelector('.reviews-list-modal');
+                        if (!reviewsListDiv) {
+                            reviewsListDiv = document.createElement('div');
+                            reviewsListDiv.className = 'reviews-list-modal';
+                            reviewsListContainer.appendChild(reviewsListDiv);
+                        }
+
+                        const reviewEl = document.createElement('div');
+                        reviewEl.className = 'review-item-modal';
+                        reviewEl.id = `review-modal-${newReview.id}`;
+                        let starsHTML = '';
+                        for (let i = 1; i <= 5; i++) {
+                            starsHTML += i <= newReview.rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                        }
+                        
+                        const escapeHtml = (unsafe) => {
+                            if (unsafe === null || typeof unsafe === 'undefined') return '';
+                            return String(unsafe)
+                                 .replace(/&/g, "&amp;")
+                                 .replace(/</g, "&lt;")
+                                 .replace(/>/g, "&gt;")
+                                 .replace(/"/g, "&quot;")
+                                 .replace(/'/g, "&#039;");
+                        };
+
+                        reviewEl.innerHTML = `
+                            <div class="review-header-modal">
+                                <span class="review-author-modal">${escapeHtml(newReview.username)}</span>
+                                <span class="review-date-modal">${newReview.formatted_date}</span>
+                            </div>
+                            <div class="review-rating-stars-modal">
+                                ${starsHTML}
+                                <span class="rating-value-text"> ${newReview.rating}/5</span>
+                            </div>
+                            ${newReview.title ? `<h4 class="review-title-text-modal">${escapeHtml(newReview.title)}</h4>` : ''}
+                            <div class="review-text-modal">${escapeHtml(newReview.content).replace(/\n/g, '<br>')}</div>
+                        `;
+                        if (reviewsListDiv.firstChild) {
+                            reviewsListDiv.insertBefore(reviewEl, reviewsListDiv.firstChild);
+                        } else {
+                            reviewsListDiv.appendChild(reviewEl);
+                        }
+                        const reviewCountSpan = document.getElementById(`modal-review-count-${productId}`);
+                        if(reviewCountSpan) {
+                            const currentCount = parseInt(reviewCountSpan.textContent || '0') + 1;
+                            reviewCountSpan.textContent = currentCount;
+                        }
+                        // Also update the main product rating display if it exists
+                        const overallRatingValueEl = document.getElementById(`modal-overall-rating-value-${productId}`);
+                        const overallRatingCountEl = document.getElementById(`modal-overall-reviews-count-${productId}`);
+                        const overallStarsContainer = document.getElementById(`modal-overall-stars-${productId}`);
+                        if (typeof window.updateOverallRatingDisplay === 'function') {
+                            window.updateOverallRatingDisplay(productId, data.new_avg_rating, data.new_total_ratings); // Assuming server sends these back
+                        }
+
+                    }
+                } else {
+                    if(formMessageEl) {
+                        formMessageEl.textContent = data.message || 'Произошла ошибка при добавлении отзыва.';
+                        formMessageEl.className = 'alert alert-danger mt-2';
+                    }
+                }
+            })
+            .catch(error => {
+                if(submitButton) submitButton.disabled = false;
+                console.error('[Modal Content Script] Review submission fetch error:', error);
+                if(formMessageEl) {
+                    formMessageEl.textContent = (error.data && error.data.message) ? error.data.message : 'Ошибка сети или сервера.';
+                    formMessageEl.className = 'alert alert-danger mt-2';
+                }
+            });
+        });
+    } else {
+         // console.warn('[Modal Content Script] Review form NOT found for productId:', productId);
+    }
+
+    // Initialize Quick Rating
+    const quickRatingStarsContainer = document.getElementById(`quick-rating-stars-modal-${productId}`);
+    if (quickRatingStarsContainer && !quickRatingStarsContainer.dataset.initializedModalQuickRating) {
+        quickRatingStarsContainer.dataset.initializedModalQuickRating = 'true';
+        // console.log('[Modal Content Script] Initializing Quick Rating for productId:', productId);
+        quickRatingStarsContainer.querySelectorAll('.quick-star').forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = this.dataset.rating;
+                const messageContainer = document.getElementById(`rating-result-modal-${productId}`);
+                const formData = new FormData();
+                formData.append('rating', rating);
+
+                fetch(`/reviews/rate/${productId}`, {
                     method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
                     body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if(data.success) {
-                        console.log('Product added to cart from modal:', data.message);
-                        if (typeof updateCartCount === 'function') {
-                            updateCartCount(data.cart_total_items);
-                        }
-                        // Optionally, show a success message in the modal
-                        // alert(data.message);
-                    } else {
-                        console.error('Error adding to cart from modal:', data.message);
-                        // alert('Ошибка: ' + data.message);
+                    if (messageContainer) {
+                        messageContainer.textContent = data.success ? `Спасибо за быструю оценку: ${rating}/5` : (data.error || 'Ошибка.');
                     }
-                })
-                .catch(error => console.error('AJAX error:', error));
-            });
-        }
-
-        // Favorite button AJAX for modal
-        const favoriteButtons = document.querySelectorAll('#productModalBody .favorite-btn');
-        console.log('[Modal Scripts] Favorite Buttons Found:', favoriteButtons.length, favoriteButtons);
-        favoriteButtons.forEach(button => {
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            
-            newButton.addEventListener('click', function() {
-                const currentProductId = this.dataset.productId;
-                console.log('[Modal Scripts] Favorite Button Clicked. ProductId:', currentProductId);
-                const icon = this.querySelector('i');
-                const countSpan = this.querySelector('.favorite-count'); // Если есть локальный счетчик
-
-                const favUrl = `/favorites/toggle/${currentProductId}`;
-                console.log('[Modal Scripts] Favorite Fetch URL:', favUrl);
-                fetch(favUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        // Заменяем упоминание csrf_token() на плейсхолдер, чтобы Jinja2 его не обрабатывал
-                        // 'X-CSRFToken': '[CSRF_TOKEN_PLACEHOLDER]' 
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        if (data.action === 'added') {
-                            this.classList.add('active');
-                            if (icon) icon.classList.remove('far'); // Опционально: меняем иконку на заполненную
-                            if (icon) icon.classList.add('fas');
-                        } else {
-                            this.classList.remove('active');
-                            if (icon) icon.classList.remove('fas'); // Опционально: меняем иконку на пустую
-                            if (icon) icon.classList.add('far');
+                    if (data.success) {
+                        let parent = this.closest('.star-rating-row');
+                        if(parent){
+                            parent.querySelectorAll('.quick-star i').forEach((s_icon, index) => {
+                                s_icon.className = index < parseInt(rating) ? 'fas fa-star' : 'far fa-star';
+                            });
                         }
-                        // Обновляем глобальный счетчик избранного в шапке, если есть такая функция
-                        if (typeof updateFavoritesCountGlobal === 'function') {
-                            updateFavoritesCountGlobal(data.favorites_count);
-                        } else {
-                            // Попытка найти и обновить стандартный счетчик в шапке
-                            const globalFavCounter = document.querySelector('#header-favorites-count'); // Предполагаемый ID
-                            if (globalFavCounter) {
-                                globalFavCounter.textContent = data.favorites_count;
-                            }
+                        
+                        // Update main product rating display elements
+                        if (typeof window.updateOverallRatingDisplay === 'function') {
+                            window.updateOverallRatingDisplay(productId, data.avg_rating, data.ratings_count);
                         }
-                        // Обновляем локальный счетчик в кнопке, если он есть
-                        if (countSpan) {
-                            // Логика обновления локального счетчика может отличаться.
-                            // Например, если он показывает '1' когда активно, и ничего, когда нет.
-                            // Для простоты, можно просто скрыть/показать или обновить его.
-                            // Эта часть требует адаптации под ваш HTML кнопки.
-                            // Предположим, что session.get('favorites', [])|length в шаблоне кнопки
-                            // должен быть заменен на актуальное значение.
-                            // Поскольку сервер уже возвращает favorites_count, можно его использовать.
-                            // Но кнопка в модальном окне может не иметь своего счетчика.
-                            // На HTML-разметке вашей кнопки в модальном окне есть span с классом favorite-count
-                            // <span class="favorite-count">{{ session.get('favorites', [])|length }}</span>
-                            // Мы можем попытаться его обновить, но это значение было отрендерено при загрузке модального окна.
-                            // Лучше полагаться на data.action для класса active и на data.favorites_count для общего счетчика.
-                        }
-                        console.log(`Favorite status for ${currentProductId}: ${data.action}, total: ${data.favorites_count}`);
-                    } else {
-                        console.error('Error toggling favorite:', data.message);
-                        // Можно добавить уведомление для пользователя об ошибке
                     }
                 })
                 .catch(error => {
-                    console.error('Fetch error for favorites:', error);
-                    // Можно добавить уведомление для пользователя об ошибке
+                    if(messageContainer) messageContainer.textContent = 'Ошибка сети.';
+                    console.error('Fetch error for quick rating:', error);
                 });
             });
         });
+    } else {
+        // if (quickRatingStarsContainer) console.log('[Modal Content Script] Quick Rating already initialized for:', productId);
+        // else console.warn('[Modal Content Script] Quick Rating container NOT found for productId:', productId);
+    }
 
-        // Compare button AJAX for modal
-        const compareButtons = document.querySelectorAll('#productModalBody .compare-btn');
-        console.log('[Modal Scripts] Compare Buttons Found:', compareButtons.length, compareButtons);
-        compareButtons.forEach(button => {
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            newButton.addEventListener('click', function() {
-                const currentProductId = this.dataset.productId;
-                console.log('[Modal Scripts] Compare Button Clicked. ProductId:', currentProductId);
-                const icon = this.querySelector('i'); // Если есть иконка
-                // const countSpan = this.querySelector('.compare-count'); // Если есть локальный счетчик
+    // Function to update overall rating display (can be called by review submission and quick rating)
+    // This should ideally be part of a global script if initializeModalScripts is responsible for it.
+    // For now, defining it here for self-containment if initializeModalScripts doesn't cover it.
+    if (typeof window.updateOverallRatingDisplay !== 'function') {
+        window.updateOverallRatingDisplay = function(pId, avgRating, totalRatings) {
+            // console.log(`Updating overall display for ${pId}: avg=${avgRating}, total=${totalRatings}`);
+            const overallRatingValueEl = document.getElementById(`modal-overall-rating-value-${pId}`);
+            const overallRatingCountEl = document.getElementById(`modal-overall-reviews-count-${pId}`);
+            const overallStarsContainer = document.getElementById(`modal-overall-stars-${pId}`);
 
-                const compareUrl = `/compare/toggle/${currentProductId}`;
-                console.log('[Modal Scripts] Compare Fetch URL:', compareUrl);
-                fetch(compareUrl, {
-                    method: 'POST',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        // CSRF token, если потребуется, должен быть добавлен здесь
-                        // 'X-CSRFToken': '[CSRF_TOKEN_PLACEHOLDER]'
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        // Если статус HTTP не 2xx, пытаемся прочитать ошибку из JSON
-                        return response.json().then(errData => {
-                            throw new Error(errData.message || `HTTP error ${response.status}`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.status === 'success') {
-                        if (data.action === 'added') {
-                            this.classList.add('active');
-                            // Тут можно добавить логику для изменения текста/иконки, если нужно
-                            // Например, this.querySelector('span').textContent = 'В сравнении';
-                        } else {
-                            this.classList.remove('active');
-                            // this.querySelector('span').textContent = 'В сравнение';
-                        }
-                        // Обновляем глобальный счетчик сравнения в шапке
-                        if (typeof updateCompareCountGlobal === 'function') {
-                            updateCompareCountGlobal(data.compare_count);
-                        } else {
-                            const globalCompareCounter = document.querySelector('#header-compare-count'); // Предполагаемый ID
-                            if (globalCompareCounter) {
-                                globalCompareCounter.textContent = data.compare_count;
-                            }
-                        }
-                        console.log(`Compare status for ${currentProductId}: ${data.action}, total: ${data.compare_count}`);
-                    } else {
-                        console.error('Error toggling compare:', data.message);
-                        // Можно добавить уведомление для пользователя об ошибке, например, alert(data.message);
-                        if(data.message) alert(data.message); // Показываем сообщение об ошибке от сервера
-                    }
-                })
-                .catch(error => {
-                    console.error('Fetch error for compare:', error);
-                    alert('Ошибка при изменении статуса сравнения: ' + error.message);
-                });
-            });
-        });
-
-        // Quantity controls for modal
-        const quantityControls = document.querySelectorAll('#productModalBody .quantity-control');
-        console.log('[Modal Scripts] Quantity Controls Found:', quantityControls.length, quantityControls);
-        quantityControls.forEach(control => {
-            const decreaseBtn = control.querySelector('.quantity-decrease');
-            const increaseBtn = control.querySelector('.quantity-increase');
-            const input = control.querySelector('input[name="quantity"]');
-            const maxStock = parseInt(input.max);
-            
-            // Clone and replace buttons to ensure fresh event listeners
-            if(decreaseBtn) {
-                const newDecreaseBtn = decreaseBtn.cloneNode(true);
-                decreaseBtn.parentNode.replaceChild(newDecreaseBtn, decreaseBtn);
-                newDecreaseBtn.addEventListener('click', () => {
-                    let currentValue = parseInt(input.value);
-                    if (currentValue > 1) input.value = currentValue - 1;
-                });
+            if (avgRating !== undefined && overallRatingValueEl) {
+                overallRatingValueEl.textContent = `${parseFloat(avgRating).toFixed(1)}/5`;
             }
-            if(increaseBtn) {
-                const newIncreaseBtn = increaseBtn.cloneNode(true);
-                increaseBtn.parentNode.replaceChild(newIncreaseBtn, increaseBtn);
-                newIncreaseBtn.addEventListener('click', () => {
-                    let currentValue = parseInt(input.value);
-                    if (currentValue < maxStock) input.value = currentValue + 1;
-                });
+            if (totalRatings !== undefined && overallRatingCountEl) {
+                overallRatingCountEl.textContent = `(${totalRatings} ${totalRatings == 1 ? 'оценка' : (1 < totalRatings && totalRatings < 5 ? 'оценки' : 'оценок')})`;
             }
-        });
-    };
+            if (avgRating !== undefined && overallStarsContainer) {
+                let avgRatingVal = parseFloat(avgRating);
+                let starsHtml = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= Math.round(avgRatingVal)) starsHtml += '<i class="fas fa-star"></i>';
+                    else if (i - 0.5 <= avgRatingVal) starsHtml += '<i class="fas fa-star-half-alt"></i>';
+                    else starsHtml += '<i class="far fa-star"></i>';
+                }
+                overallStarsContainer.innerHTML = starsHtml;
+            }
+        };
+    }
 
-    // Call initialization when modal content is loaded.
-    // The `loadProductInModal` function in layout.html should call this
-    // after successfully injecting content into #productModalBody.
-    // For example: initializeModalScripts(productId);
+    // Call to initialize other modal scripts (like favorites, compare, etc.)
+    // This is typically done by loadProductInModal in layout.html AFTER this content is injected.
+    // If window.initializeModalScripts is defined globally and handles these, it will be called.
+    // No explicit call here to avoid double initialization if layout.html already does it.
+
+})();
 </script>
 
 </rewritten_file>
