@@ -231,7 +231,7 @@
                         {% if review.title %}
                             <h4 class="review-title-text-modal">{{ review.title|escape }}</h4>
                         {% endif %}
-                        <div class="review-text-modal">{{ review.content|escape|nl2br }}</div> {# nl2br if you want to preserve newlines as <br> #}
+                        <div class="review-text-modal">{{ review.content|escape }}</div>
                     </div>
                     {% endfor %}
                 </div>
