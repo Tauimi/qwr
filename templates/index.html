@@ -65,15 +65,17 @@
         {% for product in popular_products %}
         <div class="product-card">
             <div class="product-image">
+                <a href="#" onclick="openModal({{ product.id }}); return false;">
                 {% if product.image %}
                 <img src="{{ url_for('static', filename='images/products/' + product.image) }}" alt="{{ product.name }}">
                 {% else %}
                 <img src="{{ url_for('static', filename='images/no-image.png') }}" alt="Изображение отсутствует">
                 {% endif %}
+                </a>
             </div>
             <div class="product-info">
                 <div class="product-title">
-                    <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                    <a href="#" onclick="openModal({{ product.id }}); return false;">{{ product.name }}</a>
                 </div>
                 <div class="product-price">{{ product.price }} ₽</div>
                 <a href="{{ url_for('cart.add', product_id=product.id) }}" class="add-to-cart">

@@ -146,7 +146,7 @@
                 {# positive_reviews_count = product_data[3] - если понадобится #}
                 <div class="product-card animate-fade-in">
                     <div class="product-image">
-                        <a href="{{ url_for('shop.product', product_id=product.id) }}">
+                        <a href="#" onclick="openModal({{ product.id }}); return false;">
                             <img src="{{ url_for('static', filename='images/' + product.image) }}" alt="{{ product.name }}" class="thumbnail" data-full-image="{{ url_for('static', filename='images/' + product.image) }}">
                         </a>
                         
@@ -163,7 +163,7 @@
                     </div>
                     <div class="product-info">
                         <div class="product-title">
-                            <a href="{{ url_for('shop.product', product_id=product.id) }}">{{ product.name }}</a>
+                            <a href="#" onclick="openModal({{ product.id }}); return false;">{{ product.name }}</a>
                         </div>
                         <div class="product-rating-mini">
                             <div class="stars">
