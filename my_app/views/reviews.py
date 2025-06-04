@@ -251,4 +251,74 @@ def rate_product(product_id):
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Ошибка при добавлении оценки: {str(e)}")
-        return jsonify({'success': False, 'error': 'Произошла ошибка при сохранении оценки'}) 
+        return jsonify({'success': False, 'error': 'Произошла ошибка при сохранении оценки'})
+
+# Добавляем новый маршрут для модального окна (без параметров в URL)
+@reviews_bp.route('/add-modal', methods=['POST'])
+def add_review_modal():
+    """Добавить отзыв о товаре из модального окна"""
+    # Получаем ID товара из тела формы
+    product_id = request.form.get('product_id')
+    if not product_id:
+        return jsonify({'status': 'error', 'message': 'ID товара не указан.'}), 400
+    
+    try:
+        product_id = int(product_id)
+    except ValueError:
+        return jsonify({'status': 'error', 'message': 'Некорректный ID товара.'}), 400
+    
+    # Используем ту же логику, что и в add_review
+    product = Product.query.get_or_404(product_id)
+    
+    rating = int(request.form.get('rating', 0))
+    title = request.form.get('title', '')
+    content = request.form.get('content', '')
+    user_id = session.get('user_id')
+    username = request.form.get('username')
+
+    if not content:
+        return jsonify({'status': 'error', 'message': 'Текст отзыва не может быть пустым.'}), 400
+
+    if rating == 0:
+        return jsonify({'status': 'error', 'message': 'Пожалуйста, поставьте оценку.'}), 400
+
+    actual_username = "Гость"
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            actual_username = user.username
+    elif username:
+        actual_username = username
+    
+    review = Review(
+        product_id=product_id,
+        user_id=user_id,
+        username=actual_username,
+        rating=rating,
+        title=title,
+        content=content
+    )
+    
+    try:
+        db.session.add(review)
+        db.session.commit()
+        # Возвращаем JSON с данными нового отзыва
+        return jsonify({
+            'status': 'success',
+            'message': 'Ваш отзыв успешно добавлен!',
+            'review': {
+                'id': review.id,
+                'username': review.username,
+                'rating': review.rating,
+                'title': review.title,
+                'content': review.content,
+                'formatted_date': review.formatted_date,
+                'user_id': review.user_id
+            },
+            'new_avg_rating': product.avg_rating,
+            'new_total_ratings': product.total_ratings_count
+        })
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Ошибка при добавлении отзыва из модального окна: {str(e)}")
+        return jsonify({'status': 'error', 'message': 'Произошла ошибка при добавлении отзыва.'}), 500 
