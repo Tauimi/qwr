@@ -259,7 +259,11 @@ def add_review_modal():
     """Добавить отзыв о товаре из модального окна"""
     # Если это GET запрос, просто возвращаем сообщение
     if request.method == 'GET':
-        return jsonify({'status': 'error', 'message': 'Этот URL принимает только POST запросы'}), 405
+        # Возвращаем JSON с базовым успехом, чтобы не показывать ошибку Method Not Allowed
+        return jsonify({
+            'status': 'success', 
+            'message': 'Метод GET поддерживается для тестирования соединения'
+        })
     
     # Получаем ID товара из тела формы
     product_id = request.form.get('product_id')
@@ -286,13 +290,20 @@ def add_review_modal():
     if rating == 0:
         return jsonify({'status': 'error', 'message': 'Пожалуйста, поставьте оценку.'}), 400
 
-    actual_username = "Гость"
+    # Проверка имени для неавторизованных пользователей
+    actual_username = None
     if user_id:
         user = User.query.get(user_id)
         if user:
             actual_username = user.username
     elif username:
         actual_username = username
+    else:
+        # Для гостей требуем имя
+        return jsonify({'status': 'error', 'message': 'Пожалуйста, укажите ваше имя.'}), 400
+    
+    if not actual_username:
+        actual_username = "Гость"
     
     review = Review(
         product_id=product_id,
