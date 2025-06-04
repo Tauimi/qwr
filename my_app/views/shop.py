@@ -208,13 +208,31 @@ def product(product_id):
 
 @shop_bp.route('/product_modal/<int:product_id>')
 def product_modal(product_id):
-    # Возвращаем оригинальную логику
     product = Product.query.get_or_404(product_id)
     related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
     reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
     total_reviews = len(reviews)
     avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
     if avg_rating is None: avg_rating = 0
+
+    # --- Отладочный вывод ---
+    print(f"--- DEBUG: product_modal для ID: {product_id} ---")
+    if product:
+        print(f"Product: {product.name}, ID: {product.id}")
+        print(f"Product Image: {product.image}")
+        print(f"Product Price: {product.price}")
+        print(f"Product Stock: {product.stock}")
+        print(f"Product Description length: {len(product.description) if product.description else 0}")
+        print(f"Product Specifications: {product.specifications}")
+    else:
+        print("Product: NOT FOUND (хотя get_or_404 должен был сработать)")
+    
+    print(f"Related Products count: {len(related_products)}")
+    print(f"Reviews count: {len(reviews)}")
+    print(f"Total Reviews: {total_reviews}")
+    print(f"Avg Rating: {avg_rating}")
+    print("--- END DEBUG ---")
+    # --- Конец отладочного вывода ---
 
     return render_template('product_modal_content.html', 
                            product=product, 
