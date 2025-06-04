@@ -209,37 +209,26 @@ def product(product_id):
 @shop_bp.route('/product_modal/<int:product_id>')
 def product_modal(product_id):
     product = Product.query.get_or_404(product_id)
+    # Оставляем загрузку похожих товаров
     related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
-    reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
-    total_reviews = len(reviews)
-    avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
-    if avg_rating is None: avg_rating = 0
+    
+    # Загружаем сами отзывы для отображения списка
+    reviews_list = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
+    
+    # Для общей статистики используем свойства модели Product, которые учитывают и Review и Rating
+    # avg_rating = product.avg_rating # product.avg_rating уже есть, он учитывает и Review и Rating
+    # total_reviews = product.total_ratings_count # product.total_ratings_count тоже учитывает все
 
-    # --- УДАЛЕН ОТЛАДОЧНЫЙ ВЫВОД ---
-    # print(f"--- DEBUG: product_modal для ID: {product_id} ---")
-    # if product:
-    #     print(f"Product: {product.name}, ID: {product.id}")
-    #     print(f"Product Image: {product.image}")
-    #     print(f"Product Price: {product.price}")
-    #     print(f"Product Stock: {product.stock}")
-    #     print(f"Product Description length: {len(product.description) if product.description else 0}")
-    #     print(f"Product Specifications: {product.specifications}")
-    # else:
-    #     print("Product: NOT FOUND (хотя get_or_404 должен был сработать)")
-    # 
-    # print(f"Related Products count: {len(related_products)}")
-    # print(f"Reviews count: {len(reviews)}")
-    # print(f"Total Reviews: {total_reviews}")
-    # print(f"Avg Rating: {avg_rating}")
-    # print("--- END DEBUG ---")
-    # --- Конец отладочного вывода ---
+    # --- УДАЛЕН ОТЛАДОЧНЫЙ ВЫВОД (если он был здесь) ---
 
     return render_template('product_modal_content.html', 
                            product=product, 
                            related_products=related_products,
-                           reviews=reviews,
-                           total_reviews=total_reviews,
-                           avg_rating=avg_rating)
+                           reviews_list=reviews_list, # Переименовал во избежание путаницы с product.reviews
+                           # product.avg_rating и product.total_ratings_count будут доступны через объект product
+                           # avg_rating=product.avg_rating, # Можно передать явно, если в шаблоне так удобнее
+                           # total_reviews=product.total_ratings_count # Можно передать явно
+                           )
 
 @shop_bp.route('/search')
 def search():

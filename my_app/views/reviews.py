@@ -15,20 +15,36 @@ def add_review(product_id):
     """Добавить отзыв о товаре"""
     product = Product.query.get_or_404(product_id)
     
-    # Получаем данные из формы
-    rating = int(request.form.get('rating', 5))
+    rating = int(request.form.get('rating', 0)) # 0 если не указано, нужна валидация
     title = request.form.get('title', '')
     content = request.form.get('content', '')
-    username = request.form.get('username', 'Гость')
-    
-    # Проверяем, авторизован ли пользователь
     user_id = session.get('user_id')
+    username = request.form.get('username') # Для гостей, если user_id нет
+
+    if not content: # Минимальная валидация
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Текст отзыва не может быть пустым.'}), 400
+        flash('Текст отзыва не может быть пустым.', 'error')
+        return redirect(url_for('shop.product', product_id=product_id))
+
+    if rating == 0:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Пожалуйста, поставьте оценку.'}), 400
+        flash('Пожалуйста, поставьте оценку.', 'error')
+        return redirect(url_for('shop.product', product_id=product_id))
+
+    actual_username = "Гость"
+    if user_id:
+        user = User.query.get(user_id)
+        if user:
+            actual_username = user.username
+    elif username:
+        actual_username = username # Используем имя, указанное гостем
     
-    # Создаем новый отзыв
     review = Review(
         product_id=product_id,
         user_id=user_id,
-        username=username,
+        username=actual_username, # Используем актуальное имя пользователя или гостя
         rating=rating,
         title=title,
         content=content
@@ -37,12 +53,32 @@ def add_review(product_id):
     try:
         db.session.add(review)
         db.session.commit()
+        # Для AJAX возвращаем JSON с новым отзывом (или его частью) и сообщением
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # После коммита у review будет id и created_at
+            return jsonify({
+                'status': 'success',
+                'message': 'Ваш отзыв успешно добавлен!',
+                'review': {
+                    'id': review.id,
+                    'username': review.username,
+                    'rating': review.rating,
+                    'title': review.title,
+                    'content': review.content,
+                    'formatted_date': review.formatted_date,
+                    'user_id': review.user_id
+                    # Можно добавить и другие поля, если они нужны для динамического отображения
+                }
+            })
         flash('Ваш отзыв успешно добавлен!', 'success')
     except Exception as e:
         db.session.rollback()
         current_app.logger.error(f"Ошибка при добавлении отзыва: {str(e)}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Произошла ошибка при добавлении отзыва.'}), 500
         flash('Произошла ошибка при добавлении отзыва.', 'error')
     
+    # Для не-AJAX запросов - редирект на страницу товара
     return redirect(url_for('shop.product', product_id=product_id))
 
 @reviews_bp.route('/vote/<int:review_id>/<vote_type>', methods=['POST'])

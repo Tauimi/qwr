@@ -13,6 +13,7 @@ from .favorites import favorites_bp
 from .compare import compare_bp
 from .feedback import feedback_bp
 from .reviews import reviews_bp
+from .news import news_bp
 
 # Список всех blueprint для регистрации
 all_blueprints = [
@@ -25,5 +26,6 @@ all_blueprints = [
     favorites_bp,
     compare_bp,
     feedback_bp,
-    reviews_bp
+    reviews_bp,
+    news_bp
 ] 
