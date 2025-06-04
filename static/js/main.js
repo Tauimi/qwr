@@ -1,4 +1,3 @@
-
 // Функция для инициализации карусели баннеров
 function initBannersCarousel() {
     const slides = document.querySelectorAll('.banner-slide');
@@ -535,3 +534,4 @@ document.addEventListener('DOMContentLoaded', function() {
             link.classList.add('active');
         }
     });
+});
