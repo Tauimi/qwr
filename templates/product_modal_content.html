@@ -261,8 +261,8 @@
                     method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
-                        // Следующая строка должна быть закомментирована, если CSRF-токен не используется или вызывает ошибку
-                        // 'X-CSRFToken': '{{ csrf_token() }}'
+                        // Заменяем упоминание csrf_token() на плейсхолдер, чтобы Jinja2 его не обрабатывал
+                        // 'X-CSRFToken': '[CSRF_TOKEN_PLACEHOLDER]' 
                     }
                 })
                 .then(response => response.json())
