@@ -2,17 +2,77 @@
 <div class="review-form-container">
     <h3>Оставить отзыв</h3>
     
-    <form class="review-form" action="{{ url_for('reviews.add_review', product_id=product.id) }}" method="post">
-        <div class="rating-input">
-            <label>Ваша оценка:</label>
-            <div class="star-rating">
-                {% for i in range(5, 0, -1) %}
-                    <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
-                    <label for="star{{ i }}" title="{{ i }} звезд">
-                        <i class="far fa-star"></i>
-                        <i class="fas fa-star"></i>
-                    </label>
-                {% endfor %}
+    <form class="review-form" action="{{ url_for('reviews.add_review', product_id=product.id) }}" method="post" enctype="multipart/form-data">
+        <div class="rating-section">
+            <h4>Общая оценка</h4>
+            <div class="rating-input">
+                <label>Ваша оценка:</label>
+                <div class="star-rating">
+                    {% for i in range(5, 0, -1) %}
+                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                        <label for="star{{ i }}" title="{{ i }} звезд">
+                            <i class="far fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Детальные оценки -->
+            <div class="detailed-ratings">
+                <h4>Оцените отдельные характеристики товара</h4>
+                
+                <div class="detailed-rating-item">
+                    <label>Качество:</label>
+                    <div class="detailed-stars">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="quality_star{{ i }}" name="rating_quality" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                            <label for="quality_star{{ i }}" title="{{ i }} звезд">
+                                <i class="far fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="detailed-rating-item">
+                    <label>Соотношение цена/качество:</label>
+                    <div class="detailed-stars">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="price_value_star{{ i }}" name="rating_price_value" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                            <label for="price_value_star{{ i }}" title="{{ i }} звезд">
+                                <i class="far fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="detailed-rating-item">
+                    <label>Удобство использования:</label>
+                    <div class="detailed-stars">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="usability_star{{ i }}" name="rating_usability" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                            <label for="usability_star{{ i }}" title="{{ i }} звезд">
+                                <i class="far fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="detailed-rating-item">
+                    <label>Внешний вид:</label>
+                    <div class="detailed-stars">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="appearance_star{{ i }}" name="rating_appearance" value="{{ i }}" {% if i == 5 %}checked{% endif %}>
+                            <label for="appearance_star{{ i }}" title="{{ i }} звезд">
+                                <i class="far fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -25,14 +85,88 @@
         
         <div class="form-group">
             <label for="review-title">Заголовок отзыва</label>
-            <input type="text" id="review-title" name="title" class="form-control">
+            <input type="text" id="review-title" name="title" class="form-control" placeholder="Кратко опишите впечатление от товара">
         </div>
         
         <div class="form-group">
-            <label for="review-content">Ваш отзыв</label>
-            <textarea id="review-content" name="content" class="form-control" rows="5" required></textarea>
+            <label for="usage-period">Период использования</label>
+            <select id="usage-period" name="usage_period" class="form-control">
+                <option value="">Выберите период</option>
+                <option value="less_than_week">Менее недели</option>
+                <option value="week_to_month">От недели до месяца</option>
+                <option value="one_to_three_months">1-3 месяца</option>
+                <option value="three_to_six_months">3-6 месяцев</option>
+                <option value="six_to_year">6-12 месяцев</option>
+                <option value="more_than_year">Более года</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="pros">Достоинства</label>
+            <textarea id="pros" name="pros" class="form-control" rows="3" placeholder="Что вам понравилось в товаре?"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="cons">Недостатки</label>
+            <textarea id="cons" name="cons" class="form-control" rows="3" placeholder="Какие недостатки вы заметили?"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="review-content">Комментарий</label>
+            <textarea id="review-content" name="content" class="form-control" rows="5" required placeholder="Опишите ваши впечатления от использования товара, поделитесь советами и наблюдениями"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="review-photos">Добавить фотографии</label>
+            <div class="custom-file-upload">
+                <input type="file" id="review-photos" name="photos" class="form-control-file" multiple accept="image/*">
+                <div class="photo-preview-container" id="photo-preview-container"></div>
+                <p class="text-muted small">Максимально 5 фотографий (JPG, PNG, до 5MB каждая)</p>
+            </div>
         </div>
         
         <button type="submit" class="submit-button">Опубликовать отзыв</button>
     </form>
-</div> 
+</div>
+
+<script>
+    // Предпросмотр фотографий
+    document.getElementById('review-photos').addEventListener('change', function(e) {
+        const container = document.getElementById('photo-preview-container');
+        container.innerHTML = '';
+        
+        const files = e.target.files;
+        const maxFiles = 5;
+        
+        for (let i = 0; i < Math.min(files.length, maxFiles); i++) {
+            const file = files[i];
+            if (!file.type.match('image.*')) continue;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.className = 'photo-preview';
+                
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'preview-img';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'remove-photo';
+                removeBtn.innerHTML = '&times;';
+                removeBtn.onclick = function() {
+                    preview.remove();
+                    // Обратите внимание, что это не удаляет файл из input,
+                    // для полной функциональности нужно использовать FileList API
+                };
+                
+                preview.appendChild(img);
+                preview.appendChild(removeBtn);
+                container.appendChild(preview);
+            };
+            
+            reader.readAsDataURL(file);
+        }
+    });
+</script> 

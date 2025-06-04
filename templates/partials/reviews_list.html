@@ -1,13 +1,15 @@
 <!-- Список отзывов -->
 <div class="reviews-list">
     {% if reviews %}
-        <div class="review-sorting">
-            <span>Сортировать по:</span>
-            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='date', order='desc') }}" class="sort-option {% if request.args.get('sort', 'date') == 'date' and request.args.get('order', 'desc') == 'desc' %}active{% endif %}">Сначала новые</a>
-            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='date', order='asc') }}" class="sort-option {% if request.args.get('sort') == 'date' and request.args.get('order') == 'asc' %}active{% endif %}">Сначала старые</a>
-            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='rating', order='desc') }}" class="sort-option {% if request.args.get('sort') == 'rating' and request.args.get('order') == 'desc' %}active{% endif %}">По рейтингу (высокий)</a>
-            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='rating', order='asc') }}" class="sort-option {% if request.args.get('sort') == 'rating' and request.args.get('order') == 'asc' %}active{% endif %}">По рейтингу (низкий)</a>
-            <a href="{{ url_for('reviews.product_reviews', product_id=product.id, sort='likes', order='desc') }}" class="sort-option {% if request.args.get('sort') == 'likes' %}active{% endif %}">Самые полезные</a>
+        <div class="reviews-sort">
+            <span>Сортировать:</span>
+            <select class="sort-select" id="reviews-sort">
+                <option value="date_desc">Сначала новые</option>
+                <option value="date_asc">Сначала старые</option>
+                <option value="rating_desc">По оценке (высокая)</option>
+                <option value="rating_asc">По оценке (низкая)</option>
+                <option value="helpful_desc">По полезности</option>
+            </select>
         </div>
         
         {% for review in reviews %}
@@ -15,6 +17,9 @@
                 <div class="review-header">
                     <div class="review-user">
                         <span class="user-name">{{ review.username }}</span>
+                        {% if review.is_verified_purchase %}
+                            <span class="verified-badge"><i class="fas fa-check-circle"></i> Проверенная покупка</span>
+                        {% endif %}
                         <span class="review-date">{{ review.formatted_date }}</span>
                     </div>
                     <div class="review-rating">
@@ -33,18 +38,91 @@
                     <h4 class="review-title">{{ review.title }}</h4>
                 {% endif %}
                 
+                {% if review.usage_period %}
+                <div class="review-usage-period">
+                    <i class="fas fa-history"></i> 
+                    <span>
+                        {% if review.usage_period == 'less_than_week' %}Использует менее недели
+                        {% elif review.usage_period == 'week_to_month' %}Использует от недели до месяца
+                        {% elif review.usage_period == 'one_to_three_months' %}Использует 1-3 месяца
+                        {% elif review.usage_period == 'three_to_six_months' %}Использует 3-6 месяцев
+                        {% elif review.usage_period == 'six_to_year' %}Использует 6-12 месяцев
+                        {% elif review.usage_period == 'more_than_year' %}Использует более года
+                        {% else %}{{ review.usage_period }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                
+                {% if review.pros %}
+                <div class="review-pros">
+                    <h5><i class="fas fa-plus-circle text-success"></i> Достоинства</h5>
+                    <p>{{ review.pros }}</p>
+                </div>
+                {% endif %}
+                
+                {% if review.cons %}
+                <div class="review-cons">
+                    <h5><i class="fas fa-minus-circle text-danger"></i> Недостатки</h5>
+                    <p>{{ review.cons }}</p>
+                </div>
+                {% endif %}
+                
                 <div class="review-content">
+                    <h5><i class="fas fa-comment"></i> Комментарий</h5>
                     {{ review.content }}
                 </div>
                 
+                {% if review.has_photos %}
+                <div class="review-photos">
+                    <h5><i class="fas fa-images"></i> Фотографии</h5>
+                    <div class="photos-gallery">
+                        {% for photo in review.photos %}
+                            <a href="{{ url_for('static', filename='images/reviews/' + photo.filename) }}" class="review-photo-link" data-lightbox="review-{{ review.id }}">
+                                <img src="{{ url_for('static', filename='images/reviews/' + photo.filename) }}" alt="Фото от {{ review.username }}" class="review-photo-thumbnail">
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if review.detailed_ratings %}
+                <div class="review-detailed-ratings">
+                    <h5><i class="fas fa-chart-bar"></i> Детальные оценки</h5>
+                    <div class="detailed-ratings-list">
+                        {% for detailed in review.detailed_ratings %}
+                            <div class="detailed-rating-item">
+                                <span class="aspect-name">
+                                    {% if detailed.aspect == 'quality' %}Качество
+                                    {% elif detailed.aspect == 'price_value' %}Соотношение цена/качество
+                                    {% elif detailed.aspect == 'usability' %}Удобство использования
+                                    {% elif detailed.aspect == 'appearance' %}Внешний вид
+                                    {% else %}{{ detailed.aspect }}
+                                    {% endif %}:
+                                </span>
+                                <div class="aspect-rating">
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= detailed.rating %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
                 <div class="review-footer">
-                    <div class="review-votes">
+                    <div class="review-helpfulness">
                         <span>Был ли этот отзыв полезен?</span>
-                        <button class="vote-btn like-btn" data-review-id="{{ review.id }}" data-vote-type="like">
-                            <i class="fas fa-thumbs-up"></i> <span class="like-count">{{ review.likes }}</span>
+                        <button class="helpfulness-btn helpful-btn" data-review-id="{{ review.id }}" data-vote-type="helpful">
+                            <i class="fas fa-thumbs-up"></i> <span class="helpful-count">{{ review.helpful_count }}</span>
                         </button>
-                        <button class="vote-btn dislike-btn" data-review-id="{{ review.id }}" data-vote-type="dislike">
-                            <i class="fas fa-thumbs-down"></i> <span class="dislike-count">{{ review.dislikes }}</span>
+                        <button class="helpfulness-btn not-helpful-btn" data-review-id="{{ review.id }}" data-vote-type="not_helpful">
+                            <i class="fas fa-thumbs-down"></i> <span class="not-helpful-count">{{ review.not_helpful_count }}</span>
                         </button>
                     </div>
                 </div>
@@ -77,4 +155,83 @@
             <p>У этого товара еще нет отзывов. Будьте первым, кто оставит отзыв!</p>
         </div>
     {% endif %}
-</div> 
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Обработка кнопок полезности отзыва
+    document.querySelectorAll('.helpfulness-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const reviewId = this.dataset.reviewId;
+            const voteType = this.dataset.voteType;
+            
+            fetch(`/reviews/helpful/${reviewId}/${voteType}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const helpfulCount = document.querySelector(`#review-${reviewId} .helpful-count`);
+                    const notHelpfulCount = document.querySelector(`#review-${reviewId} .not-helpful-count`);
+                    
+                    if (helpfulCount) helpfulCount.textContent = data.helpful_count;
+                    if (notHelpfulCount) notHelpfulCount.textContent = data.not_helpful_count;
+                    
+                    // Визуальная индикация активной кнопки
+                    const helpfulBtn = document.querySelector(`#review-${reviewId} .helpful-btn`);
+                    const notHelpfulBtn = document.querySelector(`#review-${reviewId} .not-helpful-btn`);
+                    
+                    if (voteType === 'helpful') {
+                        helpfulBtn.classList.toggle('active');
+                        notHelpfulBtn.classList.remove('active');
+                    } else {
+                        notHelpfulBtn.classList.toggle('active');
+                        helpfulBtn.classList.remove('active');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при голосовании:', error);
+            });
+        });
+    });
+    
+    // Сортировка отзывов
+    const sortSelect = document.getElementById('reviews-sort');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', function() {
+            const productId = window.location.pathname.split('/').pop();
+            const sortValue = this.value;
+            const [sortBy, order] = sortValue.split('_');
+            
+            fetch(`/reviews/product/${productId}?sort=${sortBy}&order=${order}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.querySelector('.reviews-list').outerHTML = html;
+                // Переинициализация обработчиков событий для новых элементов
+                document.dispatchEvent(new Event('DOMContentLoaded'));
+            })
+            .catch(error => {
+                console.error('Ошибка при сортировке отзывов:', error);
+            });
+        });
+    }
+    
+    // Инициализация lightbox для фотографий отзывов, если используется
+    if (typeof lightbox !== 'undefined') {
+        lightbox.option({
+            'resizeDuration': 200,
+            'wrapAround': true,
+            'albumLabel': 'Фото %1 из %2'
+        });
+    }
+});
+</script> 
