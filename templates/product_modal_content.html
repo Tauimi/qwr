@@ -260,10 +260,9 @@
                 fetch(`/favorites/toggle/${currentProductId}`, {
                     method: 'POST',
                     headers: {
-                        // Важно для Flask, чтобы определить AJAX-запрос
                         'X-Requested-With': 'XMLHttpRequest',
-                        // Если ваш CSRF-токен используется, его нужно добавить сюда
-                        // 'X-CSRFToken': '{{ csrf_token() }}' // Пример для Flask-WTF
+                        // Следующая строка должна быть закомментирована, если CSRF-токен не используется или вызывает ошибку
+                        // 'X-CSRFToken': '{{ csrf_token() }}'
                     }
                 })
                 .then(response => response.json())
