@@ -68,20 +68,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Функция для отправки обновленного количества на сервер
     function updateCartItemOnServer(productId, quantity) {
+        console.log('[cart.js] updateCartItemOnServer called. ProductId:', productId, 'Quantity:', quantity); // DEBUG
+        if (!productId) {
+            console.error('[cart.js] ProductId is missing in updateCartItemOnServer. Aborting fetch.');
+            return; // Не отправляем запрос без productId
+        }
+
         const formData = new FormData();
         formData.append('quantity', quantity);
         
         fetch(`/cart/update/${productId}`, {
             method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest' // ВАЖНО: Добавляем заголовок
+            },
             body: formData
         })
         .then(response => {
+            console.log('[cart.js] updateCartItemOnServer response status:', response.status); // DEBUG
             if (!response.ok) {
-                console.error('Ошибка при обновлении корзины');
+                // Попытка прочитать тело ответа как JSON в случае ошибки
+                return response.json().then(errData => {
+                    console.error('[cart.js] Error updating cart. Server response:', errData);
+                    throw new Error(errData.message || 'Ошибка при обновлении корзины на сервере.');
+                }).catch(() => {
+                    // Если тело ответа не JSON или другая ошибка парсинга
+                    throw new Error('Ошибка при обновлении корзины. Статус: ' + response.status);
+                });
+            }
+            return response.json(); // Ожидаем JSON и при успехе
+        })
+        .then(data => {
+            console.log('[cart.js] Cart updated successfully. Server data:', data);
+            // Здесь можно добавить вызов showNotification, если сервер возвращает сообщение
+            if (data && data.message && typeof showNotification === 'function') {
+                showNotification(data.message, data.status || 'success');
             }
         })
         .catch(error => {
-            console.error('Ошибка при отправке запроса:', error);
+            console.error('[cart.js] Error sending update request or processing response:', error.message);
+            if (typeof showNotification === 'function') {
+                showNotification(error.message, 'error');
+            }
         });
     }
     
