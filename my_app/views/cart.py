@@ -93,59 +93,118 @@ def add_to_cart(product_id):
     
     # Обновляем сессию
     session['cart'] = cart
-    flash('Товар добавлен в корзину', 'success')
-    
+
     # Если запрос был AJAX, возвращаем JSON
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
             'status': 'success',
             'message': 'Товар добавлен в корзину',
-            'cart_total_items': sum(item['quantity'] for item in cart)
+            'count': sum(item['quantity'] for item in cart)
         })
-    
-    # Иначе перенаправляем на страницу корзины
-    return redirect(url_for('cart.index'))
+    else:
+        flash('Товар добавлен в корзину', 'success')
+        # Иначе перенаправляем на страницу корзины
+        return redirect(url_for('cart.index'))
 
 @cart_bp.route('/update/<int:product_id>', methods=['POST'])
 def update_cart(product_id):
     """Обновляет количество товара в корзине"""
-    # Получаем новое количество из формы
     quantity = int(request.form.get('quantity', 1))
-    
-    # Проверяем, что количество положительное
+
+    if 'cart' not in session:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Корзина не найдена'}), 400
+        return redirect(url_for('cart.index')) # Остается для не-AJAX
+
+    product = Product.query.get(product_id)
+    if not product:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Товар не найден'}), 404
+        flash('Товар не найден', 'danger')
+        return redirect(url_for('cart.index'))
+
     if quantity <= 0:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Количество должно быть больше нуля'}), 400
         flash('Количество должно быть больше нуля', 'danger')
         return redirect(url_for('cart.index'))
-    
-    # Проверяем, есть ли корзина
-    if 'cart' not in session:
-        return redirect(url_for('cart.index'))
-    
-    # Обновляем количество товара
+
+    # Проверка на наличие на складе
+    if product.stock < quantity:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({
+                'status': 'error',
+                'message': f'Недостаточно товара "{product.name}" на складе (в наличии: {product.stock})',
+                'product_id': product.id
+            }), 400
+        else:
+            flash(f'Недостаточно товара "{product.name}" на складе (в наличии: {product.stock})', 'danger')
+            # ВАЖНО: Если обновляем на странице корзины, и товара не хватает,
+            # не позволяем установить количество больше, чем есть на складе.
+            # Возвращаем пользователя на корзину, чтобы он увидел сообщение.
+            # Можно также вернуть JSON с актуальным доступным количеством.
+            # Пока просто редирект с flash. Для AJAX - ошибка.
+            return redirect(url_for('cart.index'))
+
+
     cart = session['cart']
+    found = False
     for item in cart:
         if item['product_id'] == product_id:
             item['quantity'] = quantity
+            found = True
             break
     
-    # Обновляем сессию
+    if not found: # Если товара не было в корзине (маловероятно для update, но для полноты)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Товар не найден в корзине для обновления'}), 404
+        flash('Товар не найден в корзине для обновления', 'warning')
+        return redirect(url_for('cart.index'))
+
     session['cart'] = cart
-    flash('Корзина обновлена', 'success')
-    
-    return redirect(url_for('cart.index'))
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'status': 'success',
+            'message': 'Корзина обновлена',
+            'count': sum(item['quantity'] for item in cart),
+            'product_id': product_id, # для обновления конкретной строки, если нужно
+            'new_quantity': quantity, # для обновления конкретной строки
+            'new_subtotal': product.price * quantity # Посчитаем здесь, чтобы JS не думал
+        })
+    else:
+        flash('Корзина обновлена', 'success')
+        return redirect(url_for('cart.index'))
 
 @cart_bp.route('/remove/<int:product_id>', methods=['POST'])
 def remove_from_cart(product_id):
     """Удаляет товар из корзины"""
     if 'cart' not in session:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Корзина не найдена для удаления товара'}), 400
         return redirect(url_for('cart.index'))
-    
-    # Ищем товар в корзине и удаляем его
+
     cart = session['cart']
+    original_length = len(cart)
     session['cart'] = [item for item in cart if item['product_id'] != product_id]
     
-    flash('Товар удален из корзины', 'success')
-    return redirect(url_for('cart.index'))
+    if len(session['cart']) == original_length: # Товар не был найден и удален
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'status': 'error', 'message': 'Товар не найден в корзине для удаления'}), 404
+        flash('Товар не найден в корзине', 'warning')
+        return redirect(url_for('cart.index'))
+
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'status': 'success',
+            'message': 'Товар удален из корзины',
+            'count': sum(item['quantity'] for item in session.get('cart', [])), # session.get для безопасности
+            'removed_product_id': product_id
+        })
+    else:
+        flash('Товар удален из корзины', 'success')
+        return redirect(url_for('cart.index'))
 
 @cart_bp.route('/apply_promocode', methods=['POST'])
 def apply_promocode():
