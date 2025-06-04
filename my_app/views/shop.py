@@ -208,23 +208,20 @@ def product(product_id):
 
 @shop_bp.route('/product_modal/<int:product_id>')
 def product_modal(product_id):
-    # Закомментируем текущую логику
-    # product = Product.query.get_or_404(product_id)
-    # related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
-    # reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
-    # total_reviews = len(reviews)
-    # avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
-    # if avg_rating is None: avg_rating = 0
+    # Возвращаем оригинальную логику
+    product = Product.query.get_or_404(product_id)
+    related_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
+    reviews = Review.query.filter_by(product_id=product_id).order_by(Review.created_at.desc()).all()
+    total_reviews = len(reviews)
+    avg_rating = db.session.query(func.avg(Review.rating)).filter_by(product_id=product_id).scalar()
+    if avg_rating is None: avg_rating = 0
 
-    # return render_template('product_modal_content.html', 
-    #                        product=product, 
-    #                        related_products=related_products,
-    #                        reviews=reviews,
-    #                        total_reviews=total_reviews,
-    #                        avg_rating=avg_rating)
-
-    # Временно возвращаем простую строку для теста
-    return "<h1>Тестовый контент модального окна</h1><p>Если вы это видите, проблема в шаблоне product_modal_content.html.</p>"
+    return render_template('product_modal_content.html', 
+                           product=product, 
+                           related_products=related_products,
+                           reviews=reviews,
+                           total_reviews=total_reviews,
+                           avg_rating=avg_rating)
 
 @shop_bp.route('/search')
 def search():
