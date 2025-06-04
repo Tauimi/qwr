@@ -5,7 +5,7 @@ import os
 import logging
 from pathlib import Path
 from datetime import datetime
-from flask import Flask, jsonify, render_template, redirect, url_for, request, session, send_from_directory, abort, current_app
+from flask import Flask, jsonify, render_template, redirect, url_for, request, session, send_from_directory, abort, current_app, Markup
 from .extensions import db, migrate, BreakExtension
 from .config import config
 from dotenv import load_dotenv
@@ -39,6 +39,12 @@ def save_image(file, folder):
     
     return None
 
+# Определение фильтра nl2br для преобразования переносов строк в HTML теги <br>
+def nl2br_filter(text):
+    if not text:
+        return ""
+    return Markup(text.replace('\n', '<br>'))
+
 def create_app(config_name=None):
     """Создает и настраивает экземпляр приложения Flask"""
     app = Flask(__name__, 
@@ -52,6 +58,9 @@ def create_app(config_name=None):
 
     # Добавляем расширение для break
     app.jinja_env.add_extension(BreakExtension)
+    
+    # Регистрируем фильтр nl2br
+    app.jinja_env.filters['nl2br'] = nl2br_filter
 
     # Инициализация расширений
     db.init_app(app)
