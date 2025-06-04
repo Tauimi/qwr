@@ -241,43 +241,47 @@
         </div>
 
         {# Form to add review #}
-        {% if session.user_id %}
-            <div class="add-review-section-modal">
-                <h3 class="add-review-title-modal">Оставить свой отзыв</h3>
-                <form class="review-form-modal" id="review-form-modal-{{ product.id }}" method="post" novalidate>
-                    <input type="hidden" name="product_id" value="{{ product.id }}">
-                    <div class="form-group mb-3">
-                        <label class="form-label">Ваша оценка:</label>
-                        <div class="star-rating" id="form-star-rating-modal-{{product.id}}">
-                            {% for i in range(5, 0, -1) %}
-                                <input type="radio" id="star-modal-{{ product.id }}-{{ i }}" name="rating" value="{{ i }}" class="star-radio" required>
-                                <label for="star-modal-{{ product.id }}-{{ i }}" title="{{ i }} звезд">
-                                    <i class="far fa-star star-icon-empty"></i>
-                                    <i class="fas fa-star star-icon-filled"></i>
-                                </label>
-                {% endfor %}
-                        </div>
-                        <div id="rating-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
+        <div class="add-review-section-modal">
+            <h3 class="add-review-title-modal">Оставить свой отзыв</h3>
+            <form class="review-form-modal" id="review-form-modal-{{ product.id }}" method="post" novalidate>
+                <input type="hidden" name="product_id" value="{{ product.id }}">
+                <div class="form-group mb-3">
+                    <label class="form-label">Ваша оценка:</label>
+                    <div class="star-rating" id="form-star-rating-modal-{{product.id}}">
+                        {% for i in range(5, 0, -1) %}
+                            <input type="radio" id="star-modal-{{ product.id }}-{{ i }}" name="rating" value="{{ i }}" class="star-radio" required>
+                            <label for="star-modal-{{ product.id }}-{{ i }}" title="{{ i }} звезд">
+                                <i class="far fa-star star-icon-empty"></i>
+                                <i class="fas fa-star star-icon-filled"></i>
+                            </label>
+                        {% endfor %}
                     </div>
-                    
-                    <div class="form-group mb-3">
-                        <label for="review-title-modal-{{ product.id }}" class="form-label">Заголовок отзыва (необязательно)</label>
-                        <input type="text" id="review-title-modal-{{ product.id }}" name="title" class="form-control">
-                    </div>
-                    
-                    <div class="form-group mb-3">
-                        <label for="review-content-modal-{{ product.id }}" class="form-label">Ваш отзыв</label>
-                        <textarea id="review-content-modal-{{ product.id }}" name="content" class="form-control" rows="4" required></textarea>
-                        <div id="content-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary submit-review-modal-btn">Опубликовать отзыв</button>
-                    <div id="review-form-message-modal-{{product.id}}" class="mt-2"></div>
-                </form>
-            </div>
-        {% else %}
-            <p class="mt-3 text-muted">Чтобы оставить отзыв, пожалуйста, <a href="{{ url_for('auth.login', next=request.url) }}">войдите</a> или <a href="{{ url_for('auth.register') }}">зарегистрируйтесь</a>.</p>
-        {% endif %}
+                    <div id="rating-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
+                </div>
+                
+                {% if not session.user_id %}
+                <div class="form-group mb-3">
+                    <label for="username-modal-{{ product.id }}" class="form-label">Ваше имя</label>
+                    <input type="text" id="username-modal-{{ product.id }}" name="username" class="form-control" required>
+                    <div id="username-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
+                </div>
+                {% endif %}
+                
+                <div class="form-group mb-3">
+                    <label for="review-title-modal-{{ product.id }}" class="form-label">Заголовок отзыва (необязательно)</label>
+                    <input type="text" id="review-title-modal-{{ product.id }}" name="title" class="form-control">
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="review-content-modal-{{ product.id }}" class="form-label">Ваш отзыв</label>
+                    <textarea id="review-content-modal-{{ product.id }}" name="content" class="form-control" rows="4" required></textarea>
+                    <div id="content-error-modal-{{product.id}}" class="invalid-feedback d-block"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary submit-review-modal-btn">Опубликовать отзыв</button>
+                <div id="review-form-message-modal-{{product.id}}" class="mt-2"></div>
+            </form>
+        </div>
     </div>
 
     {# Related Products Section - adapted for modal #}
@@ -324,24 +328,39 @@
             const ratingErrorEl = document.getElementById(`rating-error-modal-${productId}`);
             const contentErrorEl = document.getElementById(`content-error-modal-${productId}`);
             const formMessageEl = document.getElementById(`review-form-message-modal-${productId}`);
+            const usernameErrorEl = document.getElementById(`username-error-modal-${productId}`);
 
+            // Очищаем все сообщения об ошибках
             if(ratingErrorEl) ratingErrorEl.textContent = '';
             if(contentErrorEl) contentErrorEl.textContent = '';
+            if(usernameErrorEl) usernameErrorEl.textContent = '';
             if(formMessageEl) {
                 formMessageEl.textContent = '';
                 formMessageEl.className = 'mt-2'; 
             }
 
+            // Проверяем рейтинг
             const selectedRating = formData.get('rating');
             if (!selectedRating) {
                 if(ratingErrorEl) ratingErrorEl.textContent = 'Пожалуйста, поставьте оценку.';
                 return;
             }
 
+            // Проверяем текст отзыва
             const reviewContent = formData.get('content');
             if (!reviewContent || reviewContent.trim() === '') {
                 if(contentErrorEl) contentErrorEl.textContent = 'Текст отзыва не может быть пустым.';
                 return;
+            }
+
+            // Проверяем имя пользователя для гостей
+            const usernameField = document.getElementById(`username-modal-${productId}`);
+            if (usernameField) {
+                const username = formData.get('username');
+                if (!username || username.trim() === '') {
+                    if(usernameErrorEl) usernameErrorEl.textContent = 'Пожалуйста, укажите ваше имя.';
+                    return;
+                }
             }
 
             const submitButton = this.querySelector('button[type="submit"]');
@@ -354,7 +373,7 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(response => {

@@ -35,8 +35,8 @@
 
     .product-actions {
         display: flex;
-        flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+        align-items: center;
     }
 
     .additional-actions {
@@ -85,6 +85,106 @@
     .rating-count {
         font-size: 0.7em;
         color: #666;
+    }
+    
+    /* Стили в стиле DNS */
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 20px;
+    }
+    
+    .product-card {
+        border-radius: 8px;
+        transition: box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        background-color: white;
+        padding: 16px;
+    }
+    
+    .product-card:hover {
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        transform: none;
+    }
+    
+    .product-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .product-title {
+        font-size: 15px;
+        margin-bottom: 16px;
+        line-height: 1.4;
+        height: auto;
+        max-height: 63px;
+        overflow: hidden;
+    }
+    
+    .product-specs {
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: #666;
+    }
+    
+    .spec-item {
+        margin-bottom: 4px;
+    }
+    
+    .product-price-block {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-top: auto;
+    }
+    
+    .price-container {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .product-price {
+        font-size: 24px;
+        font-weight: bold;
+        color: #000;
+        margin-bottom: 4px;
+    }
+    
+    .installment {
+        font-size: 13px;
+        color: #999;
+    }
+    
+    .product-buy {
+        display: flex;
+        align-items: center;
+    }
+    
+    .add-to-cart {
+        background-color: #ff6900;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-weight: bold;
+        transition: background-color 0.2s;
+    }
+    
+    .add-to-cart:hover {
+        background-color: #ff7a1a;
+    }
+    
+    .action-button.favorite-button {
+        color: #ccc;
+        margin-left: 8px;
+    }
+    
+    .action-button.favorite-button:hover, 
+    .action-button.favorite-button.active {
+        color: #ff6900;
     }
 </style>
 {% endblock %}
@@ -165,6 +265,16 @@
                         <div class="product-title">
                             <a href="#" onclick="loadProductInModal({{ product.id }}); return false;">{{ product.name }}</a>
                         </div>
+                        
+                        <!-- Спецификации товара (3 первых характеристики) -->
+                        <div class="product-specs">
+                            {% if product.specifications %}
+                                {% for spec in product.specifications[:3] %}
+                                <div class="spec-item">{{ spec.name }}: {{ spec.value }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        
                         <div class="product-rating-mini">
                             <div class="stars">
                                 {% for i in range(1, 6) %}
@@ -177,24 +287,26 @@
                             </div>
                             <span class="rating-count">({{ total_ratings_count }})</span>
                         </div>
-                        <div class="product-price">{{ product.price }} ₽</div>
-                        <div class="product-actions">
-                            <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="add-to-cart" {% if product.stock <= 0 %}disabled{% endif %}>
-                                    {% if product.stock > 0 %}
-                                        В корзину
-                                    {% else %}
-                                        Нет в наличии
-                                    {% endif %}
-                                </button>
-                            </form>
-                            <div class="additional-actions">
-                                <button class="action-button favorite-button" data-product-id="{{ product.id }}" title="Добавить в избранное">
+                        
+                        <div class="product-price-block">
+                            <div class="price-container">
+                                <div class="product-price">{{ product.price }} ₽</div>
+                                <div class="installment">от {{ (product.price / 12)|round|int }} ₽/мес.</div>
+                            </div>
+                            
+                            <div class="product-buy">
+                                <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="post" class="ajax-add-to-cart" data-product-id="{{ product.id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="add-to-cart" {% if product.stock <= 0 %}disabled{% endif %}>
+                                        {% if product.stock > 0 %}
+                                            Купить
+                                        {% else %}
+                                            Нет в наличии
+                                        {% endif %}
+                                    </button>
+                                </form>
+                                <button class="action-button favorite-button {% if product.id in session.get('favorites', []) %}active{% endif %}" data-product-id="{{ product.id }}" title="Добавить в избранное">
                                     <i class="fas fa-heart"></i>
-                                </button>
-                                <button class="action-button compare-button" data-product-id="{{ product.id }}" title="Добавить к сравнению">
-                                    <i class="fas fa-balance-scale"></i>
                                 </button>
                             </div>
                         </div>
