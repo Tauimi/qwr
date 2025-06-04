@@ -13,7 +13,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const quantityInput = this.querySelector('input[name="quantity"]');
             const quantity = quantityInput ? quantityInput.value : 1;
 
-            fetch(this.action, {
+            // Формируем URL для запроса, чтобы избежать проблем с Mixed Content
+            const requestUrl = `/cart/add/${productId}`;
+
+            fetch(requestUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
