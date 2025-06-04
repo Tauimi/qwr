@@ -1,15 +1,20 @@
 /* Основные стили для тем */
 :root {
     --primary-color: #4a6bff; /* Яркий синий */
+    --primary-color-rgb: 74, 107, 255; /* RGB for primary color */
     --secondary-color: #42b883; /* Зеленый */
     --accent-color: #ff7849; /* Оранжевый акцент */
+    --accent-color-rgb: 255, 120, 73; /* RGB for accent color */
     --accent-secondary: #9c6ade; /* Фиолетовый акцент */
     --dark-color: #2a3950; /* Темно-синий */
     --light-color: #f8f9fa; /* Светлый фон */
     --danger-color: #ff4757; /* Яркий красный */
+    --danger-color-rgb: 255, 71, 87; /* RGB for danger color */
     --success-color: #28c76f; /* Яркий зеленый */
-    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --success-color-rgb: 40, 199, 111; /* RGB for success color */
     --text-color: #333;
+    --text-color-rgb: 51, 51, 51; /* RGB for text-color */
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     --bg-color: #f4f8fb; /* Светло-голубоватый фон */
     --card-bg: #fff;
     --border-color: #e4e7ed;
@@ -1589,4 +1594,243 @@ body.high-contrast .unavailable-link {
     justify-content: center;
     font-size: 12px;
     font-weight: bold;
+}
+
+/* ================= Global Button Styles ================= */
+.btn,
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.button, /* Common class for link-styled buttons */
+.submit-button, /* From contact form */
+.checkout-button, /* From cart */
+.error-actions .btn, /* Error page buttons */
+.theme-button, /* Theme switch buttons */
+.banner-button /* Banner buttons */
+ {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px; /* Default padding */
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    border-radius: 6px; /* Consistent border radius */
+    transition: all 0.2s ease-in-out;
+    background-color: var(--input-bg); /* Default to input background */
+    color: var(--text-color); /* Default to text color */
+}
+
+.btn:hover,
+button:hover,
+input[type="button"]:hover,
+input[type="submit"]:hover,
+input[type="reset"]:hover,
+.button:hover,
+.submit-button:hover,
+.checkout-button:hover,
+.error-actions .btn:hover,
+.theme-button:hover,
+.banner-button:hover {
+    filter: brightness(95%);
+    text-decoration: none;
+}
+
+.btn:focus, button:focus, input[type="button"]:focus, input[type="submit"]:focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color-rgb), 0.25); /* Fallback for primary-color-rgb */
+}
+
+/* Primary Button */
+.btn-primary,
+.add-to-cart, /* From main.css, .product-card */
+.add-to-cart-large, /* From style.css, product_modal_content.html */
+.search-form button, /* From main.css */
+.checkout-button,
+.submit-button,
+.banner-button.primary /* Assuming a .primary class can be added to banner buttons */
+ {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+.btn-primary:hover,
+.add-to-cart:hover,
+.add-to-cart-large:hover,
+.search-form button:hover,
+.checkout-button:hover,
+.submit-button:hover,
+.banner-button.primary:hover {
+    background-color: var(--primary-color); /* Already set, hover handled by filter */
+    border-color: var(--primary-color);
+    filter: brightness(90%);
+}
+
+/* Secondary / Default Button (often outline or light background) */
+.btn-secondary {
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    border-color: var(--border-color);
+}
+.btn-secondary:hover {
+    background-color: var(--border-color);
+    filter: brightness(95%);
+}
+
+/* Danger Button */
+.btn-danger {
+    background-color: var(--danger-color);
+    color: #fff;
+    border-color: var(--danger-color);
+}
+.btn-danger:hover {
+    background-color: var(--danger-color);
+    filter: brightness(90%);
+}
+
+/* Success Button */
+.btn-success {
+    background-color: var(--success-color);
+    color: #fff;
+    border-color: var(--success-color);
+}
+.btn-success:hover {
+    background-color: var(--success-color);
+    filter: brightness(90%);
+}
+
+/* Icon Buttons - specific styling for favorite and compare */
+.favorite-btn,
+.compare-btn {
+    padding: 8px 12px; /* Slightly smaller padding for icon-heavy buttons */
+    background-color: var(--input-bg); /* Use input-bg for a subtle look */
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+}
+
+.favorite-btn i,
+.compare-btn i {
+    margin-right: 6px;
+    font-size: 1em; /* Ensure icon size is relative to button font size */
+}
+.favorite-btn span:not(.favorite-count), /* Target text span, not count */
+.compare-btn span {
+     font-size: 0.9rem;
+}
+
+
+.favorite-btn:hover,
+.compare-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.05); /* Light primary tint on hover */
+}
+
+.favorite-btn.active,
+.compare-btn.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+.favorite-btn.active i,
+.compare-btn.active i,
+.favorite-btn.active span, /* Ensure text also becomes white */
+.compare-btn.active span {
+    color: #fff;
+}
+
+/* Specific adjustments for quantity control buttons in modal and cart */
+.quantity-control button {
+    min-width: 30px; /* Ensure buttons are not too small */
+    padding: 6px 8px;
+    font-size: 1rem;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+    border: 1px solid var(--border-color);
+}
+.quantity-control button:hover {
+    background-color: var(--border-color);
+    filter: brightness(95%);
+}
+
+/* Ensure theme buttons also get some base styling if not covered by .btn */
+.theme-button {
+    /* Padding and border-radius are already specific, ensure other .btn properties apply */
+    font-weight: 500;
+    line-height: 1.5;
+    transition: all 0.2s ease-in-out;
+    /* Specific hover from .theme-button:hover will override filter from general button:hover */
+}
+.theme-button.active { /* Styles for active theme button are specific and should remain */
+    background-color: var(--primary-color);
+    color: white;
+}
+
+
+/* Removing redundant or less specific button styles from style.css if they conflict */
+/* For example, existing .add-to-cart-large, .checkout-button if their only purpose was what .btn-primary now does */
+/* This part requires careful checking of the full style.css to avoid breaking things. */
+/* For now, I'm restyling them by adding them to the .btn-primary group. */
+
+/* Making sure icon sizes are consistent with text in buttons */
+button i, .btn i {
+    margin-right: 0.3em; /* Default spacing if icon is before text */
+    font-size: 0.9em; /* Slightly smaller than button text by default */
+    line-height: 1; /* Prevent extra space due to icon line-height */
+}
+button i.fa-lg, .btn i.fa-lg { /* If larger icons are used */
+    font-size: 1.1em;
+}
+button i:last-child, .btn i:last-child { /* If icon is the only content or last */
+    margin-right: 0;
+}
+button i:first-child:not(:last-child), .btn i:first-child:not(:last-child) {
+   /* Standard margin-right is fine */
+}
+
+
+/* Update search button style in main.css as well for consistency, if not already covered by .search-form button */
+
+/* Apply to existing add-to-cart in main.css if it's different*/
+/* .add-to-cart in main.css (around line 233) was:
+.add-to-cart {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+It's now part of .btn-primary group which sets more modern padding/border-radius
+*/
+
+/* Ensure forms.css button styling is also harmonized if necessary */
+/* For example, .btn from forms.css (if it exists and conflicts) */
+
+/* ============== End Global Button Styles ============== */
+
+/* Disabled state for buttons */
+.btn:disabled,
+button:disabled,
+input[type="button"]:disabled,
+input[type="submit"]:disabled,
+input[type="reset"]:disabled,
+.button:disabled {
+    background-color: #e0e0e0 !important; /* Using important to ensure override if needed, though direct selectors should be enough */
+    color: #9e9e9e !important;
+    border-color: #d6d6d6 !important; /* Slightly darker border for disabled state */
+    cursor: not-allowed !important;
+    filter: none !important; /* Remove any hover/active filters */
+    box-shadow: none !important; /* Remove any active shadows */
 }
