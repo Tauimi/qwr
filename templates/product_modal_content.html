@@ -192,7 +192,7 @@
 
     // Initialize quick rating for the modal if it's not handled by event delegation
     // This is a simplified example; actual implementation might vary
-    function initializeModalScripts(productId) {
+    window.initializeModalScripts = function(productId) {
         console.log('[Modal Scripts] Initializing for productId:', productId);
 
         // Quick Rating
@@ -445,7 +445,7 @@
                 });
             }
         });
-    }
+    };
 
     // Call initialization when modal content is loaded.
     // The `loadProductInModal` function in layout.html should call this
