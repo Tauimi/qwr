@@ -251,13 +251,68 @@
         document.querySelectorAll('#productModalBody .favorite-btn').forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
+            
             newButton.addEventListener('click', function() {
                 const currentProductId = this.dataset.productId;
-                // Placeholder for AJAX call
-                console.log(`Toggled favorite for product ${currentProductId} in modal`);
-                this.classList.toggle('active');
-                // Update favorite count (if displayed and managed by JS)
-                // Example: fetch('/toggle_favorite/' + currentProductId).then(...)
+                const icon = this.querySelector('i');
+                const countSpan = this.querySelector('.favorite-count'); // Если есть локальный счетчик
+
+                fetch(`/favorites/toggle/${currentProductId}`, {
+                    method: 'POST',
+                    headers: {
+                        // Важно для Flask, чтобы определить AJAX-запрос
+                        'X-Requested-With': 'XMLHttpRequest',
+                        // Если ваш CSRF-токен используется, его нужно добавить сюда
+                        // 'X-CSRFToken': '{{ csrf_token() }}' // Пример для Flask-WTF
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (data.action === 'added') {
+                            this.classList.add('active');
+                            if (icon) icon.classList.remove('far'); // Опционально: меняем иконку на заполненную
+                            if (icon) icon.classList.add('fas');
+                        } else {
+                            this.classList.remove('active');
+                            if (icon) icon.classList.remove('fas'); // Опционально: меняем иконку на пустую
+                            if (icon) icon.classList.add('far');
+                        }
+                        // Обновляем глобальный счетчик избранного в шапке, если есть такая функция
+                        if (typeof updateFavoritesCountGlobal === 'function') {
+                            updateFavoritesCountGlobal(data.favorites_count);
+                        } else {
+                            // Попытка найти и обновить стандартный счетчик в шапке
+                            const globalFavCounter = document.querySelector('#header-favorites-count'); // Предполагаемый ID
+                            if (globalFavCounter) {
+                                globalFavCounter.textContent = data.favorites_count;
+                            }
+                        }
+                        // Обновляем локальный счетчик в кнопке, если он есть
+                        if (countSpan) {
+                            // Логика обновления локального счетчика может отличаться.
+                            // Например, если он показывает '1' когда активно, и ничего, когда нет.
+                            // Для простоты, можно просто скрыть/показать или обновить его.
+                            // Эта часть требует адаптации под ваш HTML кнопки.
+                            // Предположим, что session.get('favorites', [])|length в шаблоне кнопки
+                            // должен быть заменен на актуальное значение.
+                            // Поскольку сервер уже возвращает favorites_count, можно его использовать.
+                            // Но кнопка в модальном окне может не иметь своего счетчика.
+                            // На HTML-разметке вашей кнопки в модальном окне есть span с классом favorite-count
+                            // <span class="favorite-count">{{ session.get('favorites', [])|length }}</span>
+                            // Мы можем попытаться его обновить, но это значение было отрендерено при загрузке модального окна.
+                            // Лучше полагаться на data.action для класса active и на data.favorites_count для общего счетчика.
+                        }
+                        console.log(`Favorite status for ${currentProductId}: ${data.action}, total: ${data.favorites_count}`);
+                    } else {
+                        console.error('Error toggling favorite:', data.message);
+                        // Можно добавить уведомление для пользователя об ошибке
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error for favorites:', error);
+                    // Можно добавить уведомление для пользователя об ошибке
+                });
             });
         });
 
