@@ -128,7 +128,15 @@ def category(category_id):
     per_page = request.args.get('per_page', 9, type=int)
     
     category_obj = Category.query.get_or_404(category_id)
-    products_query = Product.query.filter_by(category_id=category_id)
+
+    # Получаем ID всех подкатегорий
+    category_ids = [category_id]
+    if category_obj.subcategories:
+        for subcategory in category_obj.subcategories:
+            category_ids.append(subcategory.id)
+
+    # Фильтруем товары по ID категории и всех ее подкатегорий
+    products_query = Product.query.filter(Product.category_id.in_(category_ids))
 
     products_query = products_query.options(
         selectinload(Product.specifications)
