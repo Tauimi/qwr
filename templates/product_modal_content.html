@@ -200,16 +200,43 @@
                 star.addEventListener('click', function() {
                     const rating = this.dataset.rating;
                     const messageContainer = document.getElementById('rating-result-modal-' + productId);
-                    // Placeholder for AJAX call to submit rating
-                    console.log(`Rated product ${productId} with ${rating} stars in modal.`);
-                    if(messageContainer) messageContainer.textContent = `Спасибо за вашу оценку: ${rating}/5`;
-                    let parent = this.closest('.star-rating-row');
-                    if(parent){
-                        let starsInRow = parent.querySelectorAll('.quick-star');
-                        starsInRow.forEach((s, index) => {
-                            s.innerHTML = index < rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
-                        });
-                    }
+                    
+                    const formData = new FormData();
+                    formData.append('rating', rating);
+
+                    fetch(`/reviews/rate/${productId}`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            // CSRF token, если потребуется
+                            // 'X-CSRFToken': '[CSRF_TOKEN_PLACEHOLDER]' 
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if(messageContainer) messageContainer.textContent = `Спасибо за вашу оценку: ${rating}/5`;
+                            console.log(`Rated product ${productId} with ${rating} stars. New avg: ${data.avg_rating}, count: ${data.ratings_count}`);
+                            // Визуальное обновление звезд
+                            let parent = this.closest('.star-rating-row');
+                            if(parent){
+                                let starsInRow = parent.querySelectorAll('.quick-star');
+                                starsInRow.forEach((s, index) => {
+                                    s.innerHTML = index < rating ? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+                                });
+                            }
+                            // Тут можно было бы обновить и отображение среднего рейтинга товара в модальном окне,
+                            // если бы для этого было предусмотрено место.
+                        } else {
+                            if(messageContainer) messageContainer.textContent = data.error || 'Ошибка при сохранении оценки.';
+                            console.error('Error submitting rating:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        if(messageContainer) messageContainer.textContent = 'Ошибка сети при сохранении оценки.';
+                        console.error('Fetch error for rating:', error);
+                    });
                 });
             });
         }
@@ -321,10 +348,56 @@
             button.parentNode.replaceChild(newButton, button);
             newButton.addEventListener('click', function() {
                 const currentProductId = this.dataset.productId;
-                // Placeholder for AJAX call
-                console.log(`Toggled compare for product ${currentProductId} in modal`);
-                this.classList.toggle('active');
-                // Example: fetch('/toggle_compare/' + currentProductId).then(...)
+                const icon = this.querySelector('i'); // Если есть иконка
+                // const countSpan = this.querySelector('.compare-count'); // Если есть локальный счетчик
+
+                fetch(`/compare/toggle/${currentProductId}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        // CSRF token, если потребуется, должен быть добавлен здесь
+                        // 'X-CSRFToken': '[CSRF_TOKEN_PLACEHOLDER]'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        // Если статус HTTP не 2xx, пытаемся прочитать ошибку из JSON
+                        return response.json().then(errData => {
+                            throw new Error(errData.message || `HTTP error ${response.status}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        if (data.action === 'added') {
+                            this.classList.add('active');
+                            // Тут можно добавить логику для изменения текста/иконки, если нужно
+                            // Например, this.querySelector('span').textContent = 'В сравнении';
+                        } else {
+                            this.classList.remove('active');
+                            // this.querySelector('span').textContent = 'В сравнение';
+                        }
+                        // Обновляем глобальный счетчик сравнения в шапке
+                        if (typeof updateCompareCountGlobal === 'function') {
+                            updateCompareCountGlobal(data.compare_count);
+                        } else {
+                            const globalCompareCounter = document.querySelector('#header-compare-count'); // Предполагаемый ID
+                            if (globalCompareCounter) {
+                                globalCompareCounter.textContent = data.compare_count;
+                            }
+                        }
+                        console.log(`Compare status for ${currentProductId}: ${data.action}, total: ${data.compare_count}`);
+                    } else {
+                        console.error('Error toggling compare:', data.message);
+                        // Можно добавить уведомление для пользователя об ошибке, например, alert(data.message);
+                        if(data.message) alert(data.message); // Показываем сообщение об ошибке от сервера
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error for compare:', error);
+                    alert('Ошибка при изменении статуса сравнения: ' + error.message);
+                });
             });
         });
 
