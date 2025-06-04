@@ -136,12 +136,15 @@
                     window.openModal(); // Теперь вызывается глобальная openModal
 
                     // Попытка инициализировать скрипты для содержимого модального окна, если это необходимо
-                    if (typeof initializeModalScripts === 'function') {
-                        initializeModalScripts(productId);
-                    } else {
-                        // Это предупреждение не критично для базовой работы модального окна
-                        // console.warn('initializeModalScripts функция не найдена. Скрипты модального окна могут быть не инициализированы.');
-                    }
+                    // Даем браузеру небольшой таймаут для обработки скриптов вставленных через innerHTML
+                    setTimeout(() => {
+                        if (typeof initializeModalScripts === 'function') {
+                            console.log('[Layout] Calling initializeModalScripts for productId:', productId);
+                            initializeModalScripts(productId);
+                        } else {
+                            console.error('[Layout] initializeModalScripts is NOT a function after timeout! Check product_modal_content.html script definition.');
+                        }
+                    }, 0); // setTimeout с 0 мс часто достаточно, можно увеличить до 50-100мс при необходимости
                 } catch (error) {
                     console.error('Не удалось загрузить информацию о товаре:', error);
                     const modalBody = document.getElementById('productModalBody');
