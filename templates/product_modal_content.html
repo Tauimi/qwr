@@ -193,18 +193,24 @@
     // Initialize quick rating for the modal if it's not handled by event delegation
     // This is a simplified example; actual implementation might vary
     function initializeModalScripts(productId) {
+        console.log('[Modal Scripts] Initializing for productId:', productId);
+
         // Quick Rating
         const quickRatingStarsContainer = document.getElementById('quick-rating-stars-modal-' + productId);
+        console.log('[Modal Scripts] Quick Rating Container:', quickRatingStarsContainer);
         if (quickRatingStarsContainer) {
             quickRatingStarsContainer.querySelectorAll('.quick-star').forEach(star => {
                 star.addEventListener('click', function() {
                     const rating = this.dataset.rating;
                     const messageContainer = document.getElementById('rating-result-modal-' + productId);
+                    console.log('[Modal Scripts] Quick Rating Clicked. ProductId:', productId, 'Rating:', rating);
                     
                     const formData = new FormData();
                     formData.append('rating', rating);
 
-                    fetch(`/reviews/rate/${productId}`, {
+                    const rateUrl = `/reviews/rate/${productId}`;
+                    console.log('[Modal Scripts] Quick Rating Fetch URL:', rateUrl);
+                    fetch(rateUrl, {
                         method: 'POST',
                         headers: {
                             'X-Requested-With': 'XMLHttpRequest',
@@ -243,6 +249,7 @@
 
         // Add to cart AJAX for modal
         const addToCartFormModal = document.querySelector('#productModalBody .ajax-add-to-cart');
+        console.log('[Modal Scripts] Add to Cart Form:', addToCartFormModal);
         if (addToCartFormModal) {
             // Clone and replace to remove old event listeners if any
             const newForm = addToCartFormModal.cloneNode(true);
@@ -275,16 +282,21 @@
         }
 
         // Favorite button AJAX for modal
-        document.querySelectorAll('#productModalBody .favorite-btn').forEach(button => {
+        const favoriteButtons = document.querySelectorAll('#productModalBody .favorite-btn');
+        console.log('[Modal Scripts] Favorite Buttons Found:', favoriteButtons.length, favoriteButtons);
+        favoriteButtons.forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
             
             newButton.addEventListener('click', function() {
                 const currentProductId = this.dataset.productId;
+                console.log('[Modal Scripts] Favorite Button Clicked. ProductId:', currentProductId);
                 const icon = this.querySelector('i');
                 const countSpan = this.querySelector('.favorite-count'); // Если есть локальный счетчик
 
-                fetch(`/favorites/toggle/${currentProductId}`, {
+                const favUrl = `/favorites/toggle/${currentProductId}`;
+                console.log('[Modal Scripts] Favorite Fetch URL:', favUrl);
+                fetch(favUrl, {
                     method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -343,15 +355,20 @@
         });
 
         // Compare button AJAX for modal
-        document.querySelectorAll('#productModalBody .compare-btn').forEach(button => {
+        const compareButtons = document.querySelectorAll('#productModalBody .compare-btn');
+        console.log('[Modal Scripts] Compare Buttons Found:', compareButtons.length, compareButtons);
+        compareButtons.forEach(button => {
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
             newButton.addEventListener('click', function() {
                 const currentProductId = this.dataset.productId;
+                console.log('[Modal Scripts] Compare Button Clicked. ProductId:', currentProductId);
                 const icon = this.querySelector('i'); // Если есть иконка
                 // const countSpan = this.querySelector('.compare-count'); // Если есть локальный счетчик
 
-                fetch(`/compare/toggle/${currentProductId}`, {
+                const compareUrl = `/compare/toggle/${currentProductId}`;
+                console.log('[Modal Scripts] Compare Fetch URL:', compareUrl);
+                fetch(compareUrl, {
                     method: 'POST',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
@@ -402,7 +419,9 @@
         });
 
         // Quantity controls for modal
-        document.querySelectorAll('#productModalBody .quantity-control').forEach(control => {
+        const quantityControls = document.querySelectorAll('#productModalBody .quantity-control');
+        console.log('[Modal Scripts] Quantity Controls Found:', quantityControls.length, quantityControls);
+        quantityControls.forEach(control => {
             const decreaseBtn = control.querySelector('.quantity-decrease');
             const increaseBtn = control.querySelector('.quantity-increase');
             const input = control.querySelector('input[name="quantity"]');
