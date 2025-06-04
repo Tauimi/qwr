@@ -146,12 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         }
                     } else {
-                        showCartNotification('Произошла ошибка при удалении товара', true);
+                        showNotification('Произошла ошибка при удалении товара', true);
                     }
                 })
                 .catch(error => {
                     console.error('Ошибка:', error);
-                    showCartNotification('Произошла ошибка при удалении товара', true);
+                    showNotification('Произошла ошибка при удалении товара', true);
                 });
             }
         });
@@ -172,29 +172,5 @@ document.addEventListener('DOMContentLoaded', function() {
         if (totalElement) {
             totalElement.textContent = total.toFixed(2) + ' ₽';
         }
-    }
-    
-    // Функция для отображения уведомления о добавлении в корзину
-    function showCartNotification(message, isError = false) {
-        // Создаем уведомление, если его нет
-        let notification = document.getElementById('cart-notification');
-        
-        if (!notification) {
-            notification = document.createElement('div');
-            notification.id = 'cart-notification';
-            document.body.appendChild(notification);
-        }
-        
-        // Добавляем класс ошибки, если это ошибка
-        notification.className = isError ? 'error' : 'success';
-        notification.textContent = message;
-        
-        // Показываем уведомление
-        notification.classList.add('show');
-        
-        // Скрываем уведомление через 3 секунды
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
     }
 });

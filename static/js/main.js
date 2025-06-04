@@ -416,26 +416,49 @@ function addToCart(productId, productName, productPrice, quantity = 1) {
 }
 
 // Функция для отображения уведомления
-function showNotification(message) {
-    // Проверяем, существует ли уже уведомление
-    let notification = document.querySelector('.notification');
-    
-    if (!notification) {
-        // Создаем элемент уведомления
-        notification = document.createElement('div');
-        notification.classList.add('notification');
-        document.body.appendChild(notification);
+function showNotification(message, type = 'success') {
+    let container = document.getElementById('notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'notification-container';
+        document.body.appendChild(container);
     }
-    
-    // Обновляем текст и показываем уведомление
+
+    const notification = document.createElement('div');
+    // Базовый класс + классы для типа уведомления
+    notification.className = 'notification notification-' + type; 
+
+    // Можно добавить иконку в зависимости от типа, если CSS это поддерживает
+    // Например, через структуру: <div><i class="fas fa-check-circle"></i><span>message</span></div>
+    // Пока просто текст:
     notification.textContent = message;
-    notification.classList.add('show');
-    
-    // Скрываем уведомление через 3 секунды
-    setTimeout(function() {
+
+    container.appendChild(notification);
+
+    // Показываем уведомление (добавляем класс 'show')
+    // Небольшая задержка, чтобы браузер успел отрисовать элемент ПЕРЕД анимацией
+    requestAnimationFrame(() => { // Используем requestAnimationFrame для лучшей синхронизации с рендерингом
+        notification.classList.add('show');
+    });
+
+    // Скрываем и удаляем уведомление через 3-5 секунд
+    // Длительность можно вынести в константу или параметр
+    const DURATION = type === 'error' ? 5000 : 3000; // Ошибки показываем дольше
+
+    setTimeout(() => {
         notification.classList.remove('show');
-    }, 3000);
-} 
+        // Даем время для анимации исчезновения перед удалением
+        setTimeout(() => {
+            if (notification.parentNode === container) { // Убедимся, что он еще там
+                container.removeChild(notification);
+            }
+            // Если контейнер пуст, его можно удалить (опционально)
+            // if (container.children.length === 0) {
+            //     container.remove();
+            // }
+        }, 500); // Эта задержка должна соответствовать длительности CSS-анимации исчезновения
+    }, DURATION);
+}
 
 // Инициализация дополнительных функций доступности
 console.log("Инициализация дополнительных функций доступности из main.js");
